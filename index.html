@@ -3,25 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha Primeira Página</title>
+    <title>Tetris Simples</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <header>
-        <h1>Bem-vindo!</h1>
-    </header>
-
-    <main>
-        <p>Esta é a sua primeira página web.</p>
-        <button id="meuBotao">Clique em mim</button>
-        <p id="mensagem"></p>
-    </main>
-
-    <footer>
-        <p>&copy; 2025 Minha Página</p>
-    </footer>
-
+    <h1>Tetris Simples</h1>
+    <div class="game-container">
+        <canvas id="tetris-canvas" width="300" height="600"></canvas>
+        <div class="score-board">
+            <h2>Pontos: <span id="score">0</span></h2>
+            <button id="start-button">Iniciar Jogo</button>
+        </div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
