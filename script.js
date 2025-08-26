@@ -1,131 +1,127 @@
+// script.js (module)
+const jumpSound = document.getElementById('jumpSound');
+const hitSound = document.getElementById('hitSound');
+const deathSound = document.getElementById('deathSound');
+
+const startScreen = document.getElementById('startScreen');
+const nameInput = document.getElementById('nameInput');
+const startBtn = document.getElementById('startBtn');
+
+const gameDiv = document.getElementById('game');
+const sky = document.getElementById('sky');
+const ground = document.getElementById('ground');
+const marioEl = document.getElementById('mario');
+const obstaclesContainer = document.getElementById('obstaclesContainer');
+const scoreEl = document.getElementById('score');
+const phaseEl = document.getElementById('phase');
+const rankingList = document.getElementById('rankingList');
+
+let playerName = null;
+let gameStarted = false;
+let gameOver = false;
+
 let score = 0;
-let jumping = false;
-let gameInterval;
-let obstacleSpeed = 10; // 🚀 Muito mais rápido
-let playerName = "";
+let baseSpeed = 10;            // base obstacle speed (fast)
+let speedMultiplier = 1.0;     // increases with score
+let spawnIntervalMs = 1200;    // initial spawn interval
+let lastSpawn = 0;
 
-// Céu fases
+let gravity = 0.9;             // gravity for jump
+let vy = 0;                    // mario vertical velocity
+let marioBottom = 72;          // ground height in px (matches CSS)
+let isJumping = false;
+
+let obstacles = []; // {el, x, w, h}
+
+// sky phases (cycle every 1000 points)
 const skyPhases = [
-  "linear-gradient(to top, #87ceeb, #ffffff)", // manhã
-  "linear-gradient(to top, #ff9966, #ff5e62)", // pôr do sol
-  "linear-gradient(to top, #0f2027, #203a43, #2c5364)", // noite
+  { css: "linear-gradient(to top, #87ceeb, #ffffff)", name: "Manhã" },
+  { css: "linear-gradient(to top, #ff9966, #ff5e62)", name: "Pôr do sol" },
+  { css: "linear-gradient(to top, #0f2027, #203a43, #2c5364)", name: "Noite" }
 ];
+let currentSkyIdx = 0;
 
-let currentPhase = 0;
-const mario = document.getElementById("mario");
-const obstacle = document.getElementById("obstacle");
-const sky = document.getElementById("sky");
-const jumpSound = document.getElementById("jumpSound");
-const deathSound = document.getElementById("deathSound");
-const hitSound = document.getElementById("hitSound");
-const rankingList = document.getElementById("rankingList");
-
-// ====== Ranking (localStorage) ======
+// ------ RANKING (localStorage) ------
 function loadRanking() {
-  let ranking = JSON.parse(localStorage.getItem("ranking")) || [];
-  rankingList.innerHTML = "";
-  ranking.slice(0, 5).forEach((p, i) => {
-    let li = document.createElement("li");
-    li.textContent = `${p.name}: ${p.score}`;
+  const raw = localStorage.getItem('mr_ranking_v1');
+  const arr = raw ? JSON.parse(raw) : [];
+  // ensure descending
+  arr.sort((a,b)=> b.score - a.score);
+  rankingList.innerHTML = '';
+  arr.slice(0,10).forEach(item=>{
+    const li = document.createElement('li');
+    li.textContent = `${item.name}: ${item.score}`;
     rankingList.appendChild(li);
   });
+  return arr;
 }
 
-function saveScore(name, score) {
-  let ranking = JSON.parse(localStorage.getItem("ranking")) || [];
-  ranking.push({ name, score });
-  ranking.sort((a, b) => b.score - a.score);
-  localStorage.setItem("ranking", JSON.stringify(ranking));
+function saveToRanking(name, pts) {
+  const raw = localStorage.getItem('mr_ranking_v1');
+  const arr = raw ? JSON.parse(raw) : [];
+  // add and keep unique by name: if name already present, we won't allow reuse (as requested)
+  arr.push({ name, score: pts });
+  // keep top 50 maybe
+  arr.sort((a,b)=> b.score - a.score);
+  localStorage.setItem('mr_ranking_v1', JSON.stringify(arr.slice(0,50)));
   loadRanking();
 }
 
-// ====== Jogo ======
-function jump() {
-  if (jumping) return;
-  jumping = true;
-  jumpSound.currentTime = 0;
-  jumpSound.play();
-
-  let jumpHeight = 0;
-  let goingUp = true;
-
-  const jumpInterval = setInterval(() => {
-    if (goingUp) {
-      jumpHeight += 7;
-      if (jumpHeight >= 150) goingUp = false;
-    } else {
-      jumpHeight -= 7;
-      if (jumpHeight <= 0) {
-        clearInterval(jumpInterval);
-        jumping = false;
-      }
-    }
-    mario.style.bottom = (70 + jumpHeight) + "px";
-  }, 15);
+// check unique name on start
+function isNameExists(name) {
+  const raw = localStorage.getItem('mr_ranking_v1');
+  if (!raw) return false;
+  const arr = JSON.parse(raw);
+  return arr.some(x=> x.name.toLowerCase() === name.toLowerCase());
 }
 
-function moveObstacle() {
-  let obstacleX = window.innerWidth;
-  obstacle.style.right = "-80px";
+// ------ UTIL ------
+function clamp(v,min,max){ return v<min?min: v>max?max:v; }
 
-  const obstacleInterval = setInterval(() => {
-    obstacleX -= obstacleSpeed;
-    obstacle.style.left = obstacleX + "px";
+// create an obstacle element and return object
+function spawnObstacle() {
+  const ob = document.createElement('div');
+  ob.className = 'obstacle';
+  // use image as background
+  ob.style.backgroundImage = "url('https://i.imgur.com/rCrDOLe.png')";
+  // random size within reasonable responsive bounds
+  const vw = Math.max(window.innerWidth, 800);
+  const widthPx = Math.round( (Math.random()*0.06 + 0.06) * vw ); // 6%..12% of vw
+  ob.style.width = widthPx + 'px';
+  ob.style.bottom = marioBottom + 'px';
+  ob.style.left = (window.innerWidth + 20) + 'px';
+  obstaclesContainer.appendChild(ob);
 
-    let marioRect = mario.getBoundingClientRect();
-    let obstacleRect = obstacle.getBoundingClientRect();
-
-    if (
-      marioRect.right > obstacleRect.left &&
-      marioRect.left < obstacleRect.right &&
-      marioRect.bottom > obstacleRect.top
-    ) {
-      clearInterval(obstacleInterval);
-      clearInterval(gameInterval);
-
-      hitSound.play();
-      setTimeout(() => deathSound.play(), 300);
-
-      saveScore(playerName, score);
-      alert("💀 Game Over! Score final: " + score);
-      window.location.reload();
-    }
-
-    if (obstacleX < -100) {
-      obstacleX = window.innerWidth;
-    }
-  }, 20);
+  const obj = { el: ob, x: window.innerWidth + 20, w: widthPx, passed:false };
+  obstacles.push(obj);
 }
 
-function startGame() {
-  document.getElementById("game").style.display = "block";
-  document.getElementById("nameScreen").style.display = "none";
-  loadRanking();
-
-  gameInterval = setInterval(() => {
-    score++;
-    document.getElementById("score").textContent = "Score: " + score;
-
-    if (score % 1000 === 0) {
-      currentPhase = (currentPhase + 1) % skyPhases.length;
-      sky.style.background = skyPhases[currentPhase];
-    }
-  }, 50);
-
-  moveObstacle();
+// remove obstacle element
+function removeObstacle(obj) {
+  try{ obj.el.remove(); }catch(e){}
+  obstacles = obstacles.filter(o=> o !== obj);
 }
 
-// ====== Entrada do nome ======
-document.getElementById("startBtn").addEventListener("click", () => {
-  const input = document.getElementById("playerName");
-  if (input.value.trim() === "") {
-    alert("Digite seu nome para jogar!");
-    return;
-  }
-  playerName = input.value.trim();
-  startGame();
-});
+// update all positions per frame
+function updateFrame(dt) {
+  if (!gameStarted || gameOver) return;
 
-document.addEventListener("keydown", (e) => {
-  if (e.code === "Space") jump();
-});
+  // increase difficulty gradually
+  speedMultiplier = 1 + (score / 1500); // slower growth than linear; tuneable
+  const speed = baseSpeed * speedMultiplier;
+
+  // MOVE obstacles
+  for (let i = obstacles.length-1; i>=0; i--) {
+    const o = obstacles[i];
+    o.x -= speed * (dt/16.67); // dt-normalized; ~60fps baseline
+    o.el.style.left = o.x + 'px';
+
+    // remove when offscreen
+    if (o.x + o.w < -50) removeObstacle(o);
+
+    // scoring when passes mario
+    if (!o.passed && (o.x + o.w) < (marioEl.getBoundingClientRect().left) ) {
+      o.passed = true;
+      // small bonus points when pass
+      score += 25;
+    }
