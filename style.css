@@ -1,52 +1,75 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f8ff;
-    color: #333;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    margin: 0;
+  font-family: sans-serif;
+  background-color: #87ceeb; /* Céu de manhã */
+  overflow: hidden;
 }
 
-h1 {
-    color: #007bff;
+.game-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
 }
 
-.container {
-    display: flex;
-    gap: 20px;
-    margin: 20px 0;
+.background {
+  background: url('https://w7.pngwing.com/pngs/984/375/png-transparent-two-white-and-blue-clouds-illustration-super-mario-bros-3-cloud-pixel-art-blue-white-text-thumbnail.png') repeat-x;
+  background-size: cover;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  z-index: 0;
+  animation: moveBackground 20s linear infinite;
 }
 
-button {
-    padding: 12px 24px;
-    font-size: 18px;
-    cursor: pointer;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s ease, transform 0.1s ease;
+@keyframes moveBackground {
+  from { background-position-x: 0; }
+  to { background-position-x: -1000px; }
 }
 
-button:hover {
-    background-color: #0056b3;
-    transform: translateY(-2px);
+.mario {
+  width: 80px;
+  position: absolute;
+  bottom: 0;
+  left: 50px;
+  z-index: 2;
+  transition: transform 0.2s;
 }
 
-button:active {
-    background-color: #004494;
-    transform: translateY(0);
+.jump {
+  animation: jump 0.5s ease-out;
 }
 
-#mensagem {
-    font-size: 24px;
-    font-weight: bold;
-    color: #d9534f;
-    text-align: center;
-    height: 30px;
-    margin-top: 20px;
+@keyframes jump {
+  0% { bottom: 0; }
+  50% { bottom: 150px; }
+  100% { bottom: 0; }
+}
+
+.obstacle {
+  width: 60px;
+  position: absolute;
+  bottom: 0;
+  right: -60px;
+  z-index: 2;
+  animation: moveObstacle 2s linear infinite;
+}
+
+@keyframes moveObstacle {
+  from { right: -60px; }
+  to { right: 100vw; }
+}
+
+.score {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 24px;
+  color: white;
+  z-index: 3;
 }
