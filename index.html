@@ -3,16 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mario Runner</title>
+  <title>Mario Runner Turbo</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="game">
+  <div id="nameScreen">
+    <h2>Digite seu nome:</h2>
+    <input type="text" id="playerName" placeholder="Seu nome">
+    <button id="startBtn">Iniciar Jogo</button>
+  </div>
+
+  <div id="game" style="display:none;">
     <div id="sky"></div>
     <div id="ground"></div>
     <div id="mario"></div>
     <div id="obstacle"></div>
     <div id="score">Score: 0</div>
+    <div id="ranking">
+      <h3>🏆 Ranking</h3>
+      <ol id="rankingList"></ol>
+    </div>
   </div>
 
   <!-- Sons -->

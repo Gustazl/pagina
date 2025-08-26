@@ -11,6 +11,27 @@ html, body {
   font-family: Arial, sans-serif;
 }
 
+/* Tela de nome */
+#nameScreen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 15px;
+}
+
+#nameScreen input {
+  padding: 10px;
+  font-size: 18px;
+}
+
+#nameScreen button {
+  padding: 10px 20px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
 #game {
   position: relative;
   width: 100vw;
@@ -70,4 +91,16 @@ html, body {
   font-weight: bold;
   color: black;
   text-shadow: 1px 1px white;
+}
+
+/* Ranking */
+#ranking {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255,255,255,0.8);
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 18px;
+  width: 200px;
 }

@@ -1,9 +1,10 @@
 let score = 0;
 let jumping = false;
 let gameInterval;
-let obstacleSpeed = 5;
+let obstacleSpeed = 10; // 🚀 Muito mais rápido
+let playerName = "";
 
-// Céu (manhã → pôr do sol → noite)
+// Céu fases
 const skyPhases = [
   "linear-gradient(to top, #87ceeb, #ffffff)", // manhã
   "linear-gradient(to top, #ff9966, #ff5e62)", // pôr do sol
@@ -17,8 +18,28 @@ const sky = document.getElementById("sky");
 const jumpSound = document.getElementById("jumpSound");
 const deathSound = document.getElementById("deathSound");
 const hitSound = document.getElementById("hitSound");
+const rankingList = document.getElementById("rankingList");
 
-// Função de pulo
+// ====== Ranking (localStorage) ======
+function loadRanking() {
+  let ranking = JSON.parse(localStorage.getItem("ranking")) || [];
+  rankingList.innerHTML = "";
+  ranking.slice(0, 5).forEach((p, i) => {
+    let li = document.createElement("li");
+    li.textContent = `${p.name}: ${p.score}`;
+    rankingList.appendChild(li);
+  });
+}
+
+function saveScore(name, score) {
+  let ranking = JSON.parse(localStorage.getItem("ranking")) || [];
+  ranking.push({ name, score });
+  ranking.sort((a, b) => b.score - a.score);
+  localStorage.setItem("ranking", JSON.stringify(ranking));
+  loadRanking();
+}
+
+// ====== Jogo ======
 function jump() {
   if (jumping) return;
   jumping = true;
@@ -30,20 +51,19 @@ function jump() {
 
   const jumpInterval = setInterval(() => {
     if (goingUp) {
-      jumpHeight += 5;
+      jumpHeight += 7;
       if (jumpHeight >= 150) goingUp = false;
     } else {
-      jumpHeight -= 5;
+      jumpHeight -= 7;
       if (jumpHeight <= 0) {
         clearInterval(jumpInterval);
         jumping = false;
       }
     }
     mario.style.bottom = (70 + jumpHeight) + "px";
-  }, 20);
+  }, 15);
 }
 
-// Movimento do obstáculo
 function moveObstacle() {
   let obstacleX = window.innerWidth;
   obstacle.style.right = "-80px";
@@ -52,7 +72,6 @@ function moveObstacle() {
     obstacleX -= obstacleSpeed;
     obstacle.style.left = obstacleX + "px";
 
-    // colisão
     let marioRect = mario.getBoundingClientRect();
     let obstacleRect = obstacle.getBoundingClientRect();
 
@@ -64,10 +83,10 @@ function moveObstacle() {
       clearInterval(obstacleInterval);
       clearInterval(gameInterval);
 
-      // toca sons de colisão e derrota
       hitSound.play();
       setTimeout(() => deathSound.play(), 300);
 
+      saveScore(playerName, score);
       alert("💀 Game Over! Score final: " + score);
       window.location.reload();
     }
@@ -78,8 +97,11 @@ function moveObstacle() {
   }, 20);
 }
 
-// Pontuação + mudança de céu
 function startGame() {
+  document.getElementById("game").style.display = "block";
+  document.getElementById("nameScreen").style.display = "none";
+  loadRanking();
+
   gameInterval = setInterval(() => {
     score++;
     document.getElementById("score").textContent = "Score: " + score;
@@ -93,7 +115,17 @@ function startGame() {
   moveObstacle();
 }
 
-window.onload = startGame;
+// ====== Entrada do nome ======
+document.getElementById("startBtn").addEventListener("click", () => {
+  const input = document.getElementById("playerName");
+  if (input.value.trim() === "") {
+    alert("Digite seu nome para jogar!");
+    return;
+  }
+  playerName = input.value.trim();
+  startGame();
+});
+
 document.addEventListener("keydown", (e) => {
   if (e.code === "Space") jump();
 });
