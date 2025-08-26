@@ -1,13 +1,19 @@
 const mario = document.getElementById("mario");
 const obstacle = document.getElementById("obstacle");
 const scoreSpan = document.getElementById("score");
+const phaseText = document.getElementById("phase");
 const game = document.getElementById("game");
 
 let score = 0;
 let isJumping = false;
 let isGameOver = false;
-let backgroundColors = ["#87ceeb", "#ffa07a", "#2c3e50"];
-let currentBackgroundIndex = 0;
+let currentPhase = 0;
+
+const phases = [
+  { color: "#87ceeb", name: "Manhã" },
+  { color: "#ffa07a", name: "Tarde" },
+  { color: "#2c3e50", name: "Noite" }
+];
 
 function jump() {
   if (isJumping || isGameOver) return;
@@ -22,16 +28,18 @@ function jump() {
 function updateScore() {
   if (isGameOver) return;
   score++;
-  scoreSpan.textContent = score;
+  scoreSpan.innerHTML = `<b>${score}</b>`;
 
-  if (score % 500 === 0) {
-    changeBackground();
+  let newPhaseIndex = Math.floor(score / 500) % phases.length;
+  if (newPhaseIndex !== currentPhase) {
+    changePhase(newPhaseIndex);
   }
 }
 
-function changeBackground() {
-  currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundColors.length;
-  document.body.style.backgroundColor = backgroundColors[currentBackgroundIndex];
+function changePhase(index) {
+  currentPhase = index;
+  document.body.style.backgroundColor = phases[index].color;
+  phaseText.innerHTML = `<b>Fase: ${phases[index].name}</b>`;
 }
 
 function checkCollision() {
@@ -66,4 +74,3 @@ setInterval(() => {
     checkCollision();
   }
 }, 50);
-

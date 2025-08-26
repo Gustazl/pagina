@@ -6,7 +6,7 @@
 
 body {
   font-family: sans-serif;
-  background-color: #87ceeb; /* Céu de manhã */
+  background-color: #87ceeb; /* Manhã */
   overflow: hidden;
 }
 
@@ -15,21 +15,6 @@ body {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-}
-
-.background {
-  background: url('https://w7.pngwing.com/pngs/984/375/png-transparent-two-white-and-blue-clouds-illustration-super-mario-bros-3-cloud-pixel-art-blue-white-text-thumbnail.png') repeat-x;
-  background-size: cover;
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  z-index: 0;
-  animation: moveBackground 20s linear infinite;
-}
-
-@keyframes moveBackground {
-  from { background-position-x: 0; }
-  to { background-position-x: -1000px; }
 }
 
 .mario {
@@ -57,7 +42,7 @@ body {
   bottom: 0;
   right: -60px;
   z-index: 2;
-  animation: moveObstacle 2s linear infinite;
+  animation: moveObstacle 1.2s linear infinite; /* Mais rápido */
 }
 
 @keyframes moveObstacle {
@@ -65,11 +50,16 @@ body {
   to { right: 100vw; }
 }
 
-.score {
+.score, .phase {
   position: absolute;
   top: 20px;
   left: 20px;
   font-size: 24px;
   color: white;
   z-index: 3;
+  font-weight: bold;
+}
+
+.phase {
+  top: 60px;
 }
