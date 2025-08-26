@@ -1,42 +1,77 @@
-body {
+/* Reset geral */
+* {
   margin: 0;
   padding: 0;
-  font-family: sans-serif;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+#game {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
   overflow: hidden;
 }
 
-canvas {
-  display: block;
-  margin: 0 auto;
-  display: none; /* Escondido até começar */
+/* Céu inicial */
+#sky {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, #87ceeb, #ffffff); /* Azul claro para branco */
+  transition: background 2s linear;
+  z-index: -2;
 }
 
-#ranking {
+/* Linha verde do chão */
+#ground {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  background: green;
+  z-index: -1;
+}
+
+/* Mario */
+#mario {
+  position: absolute;
+  bottom: 50px;
+  left: 100px;
+  width: 60px;
+  height: 60px;
+  background: url('https://i.imgur.com/QUcZYrn.gif') no-repeat center/cover;
+}
+
+/* Obstáculo */
+#obstacle {
+  position: absolute;
+  bottom: 50px;
+  right: -60px;
+  width: 50px;
+  height: 50px;
+  background: url('https://i.imgur.com/rCrDOLe.png') no-repeat center/cover;
+}
+
+/* Pontuação */
+#score {
   position: absolute;
   top: 10px;
-  right: 10px;
-  width: 200px;
-  background: rgba(255, 255, 255, 0.7);
-  padding: 10px;
-  border-radius: 10px;
+  left: 10px;
+  font-size: 24px;
   font-weight: bold;
-  font-size: 16px;
-}
-
-#startScreen {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: #87CEEB;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-}
-
-#startScreen input {
-  font-size: 18px;
-  padding: 5px;
-  margin: 10px 0;
+  color: black;
+  text-shadow: 1px 1px white;
 }
