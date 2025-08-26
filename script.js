@@ -1,7 +1,6 @@
-// === Firebase Config ===
+// ----------------- Firebase -----------------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getDatabase, ref, push, query, orderByChild, limitToLast, get } 
-  from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAMwEcrs7DnNNuBAsJJq83LHpQILubCKUg",
@@ -13,122 +12,144 @@ const firebaseConfig = {
   appId: "1:598294976090:web:bd480d135fe947da1eaa63",
   measurementId: "G-3MP6ZD8JZH"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// === Variáveis do jogo ===
+// ----------------- Variáveis do jogo -----------------
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-canvas.width = 800;
-canvas.height = 300;
 
-let mario = { x: 50, y: 200, width: 40, height: 40, vy: 0, jumping: false };
+let mario = { x: 50, y: 300, w: 40, h: 40, vy: 0, jumping: false };
+let gravity = 0.6;
 let obstacles = [];
 let score = 0;
 let gameOver = false;
-let animationId;
+let speed = 6;
 
-// === Controles ===
-document.addEventListener("keydown", e => {
+// ----------------- Controles -----------------
+document.addEventListener("keydown", (e) => {
   if ((e.code === "Space" || e.code === "ArrowUp") && !mario.jumping) {
     mario.vy = -12;
     mario.jumping = true;
   }
 });
 
-// === Loop do jogo ===
-function gameLoop() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+// ----------------- Loop do jogo -----------------
+function drawBackground() {
+  let stage = Math.floor(score / 500) % 3; 
+  if (stage === 0) ctx.fillStyle = "#87ceeb"; // manhã
+  else if (stage === 1) ctx.fillStyle = "#ffcc66"; // tarde
+  else ctx.fillStyle = "#2c3e50"; // noite
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
 
-  // Mario
+function drawMario() {
+  ctx.fillStyle = "red";
+  ctx.fillRect(mario.x, mario.y, mario.w, mario.h);
+}
+
+function drawObstacles() {
+  ctx.fillStyle = "green";
+  obstacles.forEach(o => ctx.fillRect(o.x, o.y, o.w, o.h));
+}
+
+function updateMario() {
   mario.y += mario.vy;
-  mario.vy += 0.6; // gravidade
-  if (mario.y > 200) {
-    mario.y = 200;
+  mario.vy += gravity;
+
+  if (mario.y >= 300) {
+    mario.y = 300;
     mario.jumping = false;
   }
-  ctx.fillStyle = "red";
-  ctx.fillRect(mario.x, mario.y, mario.width, mario.height);
+}
 
-  // Obstáculos
+function updateObstacles() {
   if (Math.random() < 0.02) {
-    obstacles.push({ x: 800, y: 220, width: 20, height: 40 });
+    obstacles.push({ x: canvas.width, y: 320, w: 20, h: 40 });
   }
-  obstacles.forEach(o => {
-    o.x -= 6;
-    ctx.fillStyle = "green";
-    ctx.fillRect(o.x, o.y, o.width, o.height);
+  obstacles.forEach(o => o.x -= speed);
+  obstacles = obstacles.filter(o => o.x + o.w > 0);
+}
 
-    // Colisão
+function checkCollision() {
+  for (let o of obstacles) {
     if (
-      mario.x < o.x + o.width &&
-      mario.x + mario.width > o.x &&
-      mario.y < o.y + o.height &&
-      mario.y + mario.height > o.y
+      mario.x < o.x + o.w &&
+      mario.x + mario.w > o.x &&
+      mario.y < o.y + o.h &&
+      mario.y + mario.h > o.y
     ) {
       endGame();
     }
-  });
-
-  // Score
-  score++;
-  ctx.fillStyle = "black";
-  ctx.fillText("Score: " + score, 10, 20);
-
-  if (!gameOver) {
-    animationId = requestAnimationFrame(gameLoop);
   }
 }
 
-function endGame() {
-  gameOver = true;
-  cancelAnimationFrame(animationId);
-  document.getElementById("finalScore").innerText = score;
-  document.getElementById("gameOverModal").classList.remove("hidden");
+function drawScore() {
+  ctx.fillStyle = "black";
+  ctx.font = "20px Arial";
+  ctx.fillText("Pontuação: " + score, 10, 20);
 }
 
-// === Salvar Score no Firebase ===
+function gameLoop() {
+  if (gameOver) return;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  drawBackground();
+  updateMario();
+  updateObstacles();
+  drawMario();
+  drawObstacles();
+  checkCollision();
+
+  score++;
+  speed = 6 + Math.floor(score / 500); // dificuldade progressiva
+  drawScore();
+
+  requestAnimationFrame(gameLoop);
+}
+
+// ----------------- Fim de jogo -----------------
+function endGame() {
+  gameOver = true;
+  document.getElementById("finalScore").textContent = score;
+  document.getElementById("gameOver").classList.remove("hidden");
+}
+
+// ----------------- Ranking -----------------
 document.getElementById("saveScoreBtn").addEventListener("click", async () => {
-  const name = document.getElementById("playerName").value || "Anônimo";
-  const scoresRef = ref(db, "pontuacoes");
-  await push(scoresRef, { name, score, date: Date.now() });
+  const name = document.getElementById("playerName").value.trim();
+  if (!name) return alert("Digite um nome!");
+
+  const scoresRef = ref(db, "pontuacoes/" + name);
+  const snapshot = await get(scoresRef);
+
+  if (snapshot.exists()) {
+    alert("Nome já existente, utilize outro.");
+    return;
+  }
+
+  await set(scoresRef, { name, score, date: Date.now() });
   loadRanking();
 });
 
-// === Carregar Ranking ===
 async function loadRanking() {
-  const scoresRef = query(ref(db, "pontuacoes"), orderByChild("score"), limitToLast(10));
+  const scoresRef = ref(db, "pontuacoes");
   const snapshot = await get(scoresRef);
-  const scores = [];
-  snapshot.forEach(child => scores.push(child.val()));
+  if (!snapshot.exists()) return;
+
+  const scores = Object.values(snapshot.val());
   scores.sort((a, b) => b.score - a.score);
 
   const list = document.getElementById("rankingList");
   list.innerHTML = "";
-  scores.forEach(s => {
+  scores.slice(0, 10).forEach(s => {
     const li = document.createElement("li");
     li.textContent = `${s.name} - ${s.score}`;
     list.appendChild(li);
   });
 }
 
-// === Iniciar Jogo ===
-document.getElementById("startBtn").addEventListener("click", () => {
-  document.getElementById("start-screen").classList.add("hidden");
-  score = 0;
-  gameOver = false;
-  obstacles = [];
-  gameLoop();
-});
-
-document.getElementById("restartBtn").addEventListener("click", () => {
-  document.getElementById("gameOverModal").classList.add("hidden");
-  score = 0;
-  gameOver = false;
-  obstacles = [];
-  gameLoop();
-});
-
-// Carregar ranking ao abrir
+// ----------------- Início -----------------
 loadRanking();
+gameLoop();

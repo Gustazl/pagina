@@ -2,31 +2,20 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mario Runner Firebase</title>
+  <title>Mario Runner - Feira de Ciências</title>
   <link rel="stylesheet" href="style.css">
-  <!-- Firebase -->
-  <script type="module" src="script.js" defer></script>
 </head>
 <body>
-  <div id="start-screen">
-    <h1>Mario Runner</h1>
-    <input id="playerName" placeholder="Digite seu nome">
-    <button id="startBtn">Começar</button>
-  </div>
+  <h1>Mario Runner</h1>
 
-  <canvas id="gameCanvas"></canvas>
+  <canvas id="gameCanvas" width="800" height="400"></canvas>
 
-  <div id="gameOverModal" class="hidden">
+  <div id="gameOver" class="hidden">
     <h2>Game Over!</h2>
     <p>Sua pontuação: <span id="finalScore"></span></p>
-    <button id="saveScoreBtn">Salvar</button>
-    <button id="restartBtn">Reiniciar</button>
+    <input type="text" id="playerName" placeholder="Digite seu nome">
+    <button id="saveScoreBtn">Salvar Pontuação</button>
   </div>
 
-  <div id="ranking">
-    <h3>Ranking</h3>
-    <ol id="rankingList"></ol>
-  </div>
-</body>
-</html>
+  <h2>Ranking</h2>
+  <ul id="rankingList"></
