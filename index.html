@@ -5,11 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mario Runner</title>
   <link rel="stylesheet" href="style.css">
-  <!-- Firebase CDN -->
   <script type="module" src="script.js" defer></script>
 </head>
 <body>
+  <!-- Tela inicial -->
+  <div id="startScreen">
+    <h1>Mario Runner</h1>
+    <h3>Projeto feito pelo 2°DDS</h3>
+    <input type="text" id="playerNameInput" placeholder="Digite seu nome">
+    <p>Pressione SPACE para começar</p>
+  </div>
+
+  <!-- Canvas do jogo -->
   <canvas id="gameCanvas" width="800" height="400"></canvas>
+
+  <!-- Ranking -->
   <div id="ranking"></div>
 </body>
 </html>
