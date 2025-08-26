@@ -1,8 +1,8 @@
-// Import Firebase SDK direto do CDN (para usar no GitHub Pages)
+// Import Firebase CDN
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-// Configuração do Firebase (sua)
+// Configuração Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyAMwEcrs7DnNNuBAsJJq83LHpQILubCKUg",
   authDomain: "projeto-feira-d-ciencias-mario.firebaseapp.com",
@@ -18,7 +18,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// 🎮 Variáveis do jogo
+// Variáveis do jogo
 let canvas, ctx;
 let mario = { x: 50, y: 150, width: 40, height: 40, jumping: false, vy: 0 };
 let ground = 200;
@@ -26,21 +26,48 @@ let gravity = 0.6;
 let obstacles = [];
 let score = 0;
 let gameOver = false;
-let speed = 4; // aumenta com pontos
-let bgPhase = "manha"; // manhã, tarde, noite
+let speed = 4;
+let bgPhase = "manha";
+let playerName = null;
+let gameStarted = false;
 
-// Iniciar jogo
+// Nome do jogador
+async function askPlayerName() {
+  playerName = prompt("Digite seu nome:");
+  if (!playerName || playerName.trim() === "") {
+    alert("Nome inválido!");
+    return askPlayerName();
+  }
+
+  const dbRef = ref(db);
+  const snapshot = await get(child(dbRef, "ranking/" + playerName));
+  if (snapshot.exists()) {
+    alert("Nome já existente, utilize outro.");
+    return askPlayerName();
+  }
+
+  carregarRanking();
+  alert("Aperte SPACE para começar!");
+}
+
+// Inicializa o jogo
 function initGame() {
   canvas = document.getElementById("gameCanvas");
   ctx = canvas.getContext("2d");
 
-  document.addEventListener("keydown", jump);
+  document.addEventListener("keydown", (e) => {
+    if (!gameStarted && e.code === "Space") {
+      gameStarted = true;
+      alert("Jogo iniciado!");
+    }
+    if (gameStarted) jump(e);
+  });
 
   setInterval(update, 20);
   setInterval(spawnObstacle, 2000);
 }
 
-// Pular
+// Função pular
 function jump(e) {
   if (e.code === "Space" && !mario.jumping && !gameOver) {
     mario.jumping = true;
@@ -50,18 +77,18 @@ function jump(e) {
 
 // Atualização do jogo
 function update() {
-  if (gameOver) return;
+  if (!gameStarted || gameOver) return;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Fundo muda conforme pontos
+  // Fundo muda automaticamente
   if (score < 500) bgPhase = "manha";
   else if (score < 1000) bgPhase = "tarde";
   else bgPhase = "noite";
 
-  if (bgPhase === "manha") ctx.fillStyle = "#87CEEB"; // azul claro
-  if (bgPhase === "tarde") ctx.fillStyle = "#FFA500"; // laranja
-  if (bgPhase === "noite") ctx.fillStyle = "#191970"; // azul escuro
+  if (bgPhase === "manha") ctx.fillStyle = "#87CEEB";
+  if (bgPhase === "tarde") ctx.fillStyle = "#FFA500";
+  if (bgPhase === "noite") ctx.fillStyle = "#191970";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // Mario
@@ -81,7 +108,6 @@ function update() {
     ctx.fillStyle = "green";
     ctx.fillRect(o.x, o.y, o.width, o.height);
 
-    // colisão
     if (
       mario.x < o.x + o.width &&
       mario.x + mario.width > o.x &&
@@ -91,24 +117,21 @@ function update() {
       endGame();
     }
   }
-
   obstacles = obstacles.filter(o => o.x + o.width > 0);
 
-  // Score
+  // Pontuação
   score++;
   ctx.fillStyle = "black";
   ctx.font = "20px Arial";
   ctx.fillText("Pontos: " + score, 20, 30);
 
   // Dificuldade progressiva
-  if (score % 300 === 0) {
-    speed += 0.5;
-  }
+  speed = 4 + score / 200;
 }
 
-// Criar obstáculo
+// Criar obstáculos
 function spawnObstacle() {
-  if (gameOver) return;
+  if (!gameStarted || gameOver) return;
   let height = 40;
   obstacles.push({ x: canvas.width, y: ground - height, width: 30, height: height });
 }
@@ -120,24 +143,13 @@ function endGame() {
   ctx.font = "30px Arial";
   ctx.fillText("Game Over!", canvas.width / 2 - 80, canvas.height / 2);
 
-  setTimeout(() => {
-    let nome = prompt("Digite seu nome:");
-    if (nome) salvarPontuacao(nome, score);
-  }, 100);
+  if (playerName) salvarPontuacao(playerName, score);
 }
 
-// Salvar no Firebase (sem nomes repetidos)
+// Salvar pontuação no Firebase
 async function salvarPontuacao(nome, pontos) {
-  const dbRef = ref(db);
-  const snapshot = await get(child(dbRef, "ranking/" + nome));
-
-  if (snapshot.exists()) {
-    alert("Nome já existente, utilize outro.");
-  } else {
-    await set(ref(db, "ranking/" + nome), { pontos: pontos });
-    alert("Pontuação salva!");
-    carregarRanking();
-  }
+  await set(ref(db, "ranking/" + nome), { pontos: pontos });
+  carregarRanking();
 }
 
 // Carregar ranking
@@ -158,7 +170,8 @@ async function carregarRanking() {
   }
 }
 
+// Ao carregar a página
 window.onload = () => {
+  askPlayerName();
   initGame();
-  carregarRanking();
 };

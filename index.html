@@ -1,47 +1,15 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mario Runner - Feira</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mario Runner</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Firebase CDN -->
+  <script type="module" src="script.js" defer></script>
 </head>
 <body>
-  <header>
-    <h1>Mario Runner</h1>
-    <p>Use ESPAÇO ou ↑ para pular. A cada 500 pontos muda o cenário.</p>
-  </header>
-
-  <main>
-    <canvas id="gameCanvas" width="800" height="400"></canvas>
-
-    <section id="hud">
-      <div>Pontuação: <span id="scoreDisplay">0</span></div>
-      <div id="phaseDisplay">Fase: Manhã</div>
-    </section>
-
-    <div id="gameOver" class="hidden">
-      <h2>Game Over</h2>
-      <p>Sua pontuação: <strong id="finalScore">0</strong></p>
-      <input id="playerName" type="text" placeholder="Digite seu nome (único)" maxlength="20" />
-      <div class="buttons">
-        <button id="saveScoreBtn">Salvar Pontuação</button>
-        <button id="restartBtn">Reiniciar</button>
-      </div>
-      <p id="saveMsg" class="small"></p>
-    </div>
-
-    <section id="rankingSection">
-      <h3>🏆 Ranking (Top 10)</h3>
-      <ol id="rankingList"></ol>
-    </section>
-  </main>
-
-  <!-- Firebase (compat) -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
-  <!-- jogo -->
-  <script type="module" src="script.js"></script>
+  <canvas id="gameCanvas" width="800" height="400"></canvas>
+  <div id="ranking"></div>
 </body>
 </html>
