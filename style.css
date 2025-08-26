@@ -3,14 +3,12 @@ body {
   padding: 0;
   font-family: sans-serif;
   overflow: hidden;
-  background-color: #87CEEB;
 }
 
 canvas {
   display: block;
   margin: 0 auto;
-  background-color: #87CEEB;
-  display: none; /* Inicialmente escondido */
+  display: none; /* Escondido até começar */
 }
 
 #ranking {

@@ -16,155 +16,94 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Variáveis do jogo
-let canvas, ctx;
-let mario = { x: 50, y: 150, width: 40, height: 40, jumping: false, vy: 0 };
-let ground = 200;
-let gravity = 0.6;
-let obstacles = [];
-let score = 0;
-let gameOver = false;
-let speed = 4;
-let bgPhase = "manha";
-let playerName = null;
-let gameStarted = false;
-
-// Elementos
+// Elementos e variáveis
 const startScreen = document.getElementById("startScreen");
 const inputName = document.getElementById("playerNameInput");
-const canvasElement = document.getElementById("gameCanvas");
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
 const rankingDiv = document.getElementById("ranking");
 
-// Função para iniciar após nome
+let playerName = null;
+let gameStarted = false;
+let gameOverFlag = false;
+let score = 0;
+let speed = 4;
+
+// Mario
+const marioImg = new Image();
+marioImg.src = "https://i.imgur.com/QUcZYrn.gif";
+const marioDeadImg = new Image();
+marioDeadImg.src = "https://i.imgur.com/rAD2ZZ2.png";
+let mario = { x: 50, y: 150, width: 40, height: 40, vy: 0, jumping: false };
+
+// Obstáculos
+const obstacleImg = new Image();
+obstacleImg.src = "https://i.imgur.com/rCrDOLe.png";
+let obstacles = [];
+
+// Background
+const bgImg = new Image();
+bgImg.src = "https://i.imgur.com/US6zl37.png";
+
+// Sons
+const jumpSound = new Audio("https://cdn.pixabay.com/download/audio/2024/09/29/audio_3397905774.mp3?filename=jump-up-245782.mp3");
+const hitSound = new Audio("https://www.myinstants.com/media/sounds/super-mario-bros_2.mp3");
+const deathSound = new Audio("https://www.myinstants.com/media/sounds/roblox-death-sound_1.mp3");
+
+let ground = 300;
+let gravity = 0.6;
+
+// --- Funções do jogo ---
+
+// Iniciar o jogo
 async function startGame() {
   playerName = inputName.value.trim();
-  if (!playerName) {
-    alert("Digite um nome válido!");
-    return;
-  }
+  if (!playerName) { alert("Digite um nome válido!"); return; }
 
-  const dbRef = ref(db);
-  const snapshot = await get(child(dbRef, "ranking/" + playerName));
-  if (snapshot.exists()) {
-    alert("Nome já existente, utilize outro.");
-    return;
-  }
+  const snapshot = await get(child(ref(db), "ranking/" + playerName));
+  if (snapshot.exists()) { alert("Nome já existente, utilize outro."); return; }
 
-  // Oculta tela inicial e mostra canvas
   startScreen.style.display = "none";
-  canvasElement.style.display = "block";
-
-  carregarRanking();
+  canvas.style.display = "block";
   gameStarted = true;
-}
-
-// Inicializa canvas
-function initGame() {
-  canvas = canvasElement;
-  ctx = canvas.getContext("2d");
-
-  document.addEventListener("keydown", (e) => {
-    if (!gameStarted && e.code === "Space") {
-      startGame();
-    } else if (gameStarted && e.code === "Space") {
-      jump();
-    }
-  });
-
-  setInterval(update, 20);
-  setInterval(spawnObstacle, 2000);
+  requestAnimationFrame(gameLoop);
 }
 
 // Pular
 function jump() {
-  if (!mario.jumping && !gameOver) {
+  if (!mario.jumping && !gameOverFlag) {
+    mario.vy = -12;
     mario.jumping = true;
-    mario.vy = -10;
+    jumpSound.play();
   }
-}
-
-// Atualização do jogo
-function update() {
-  if (!gameStarted || gameOver) return;
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Cenário automático
-  if (score < 500) bgPhase = "manha";
-  else if (score < 1000) bgPhase = "tarde";
-  else bgPhase = "noite";
-
-  if (bgPhase === "manha") ctx.fillStyle = "#87CEEB";
-  if (bgPhase === "tarde") ctx.fillStyle = "#FFA500";
-  if (bgPhase === "noite") ctx.fillStyle = "#191970";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Mario
-  mario.y += mario.vy;
-  if (mario.jumping) mario.vy += gravity;
-  if (mario.y >= ground - mario.height) {
-    mario.y = ground - mario.height;
-    mario.jumping = false;
-  }
-  ctx.fillStyle = "red";
-  ctx.fillRect(mario.x, mario.y, mario.width, mario.height);
-
-  // Obstáculos
-  for (let i = 0; i < obstacles.length; i++) {
-    let o = obstacles[i];
-    o.x -= speed;
-    ctx.fillStyle = "green";
-    ctx.fillRect(o.x, o.y, o.width, o.height);
-
-    if (
-      mario.x < o.x + o.width &&
-      mario.x + mario.width > o.x &&
-      mario.y < o.y + o.height &&
-      mario.y + mario.height > o.y
-    ) {
-      endGame();
-    }
-  }
-  obstacles = obstacles.filter(o => o.x + o.width > 0);
-
-  // Score
-  score++;
-  ctx.fillStyle = "black";
-  ctx.font = "20px Arial";
-  ctx.fillText("Pontos: " + score, 20, 30);
-
-  // Dificuldade progressiva
-  speed = 4 + score / 200;
 }
 
 // Criar obstáculos
 function spawnObstacle() {
-  if (!gameStarted || gameOver) return;
-  let height = 40;
-  obstacles.push({ x: canvas.width, y: ground - height, width: 30, height: height });
+  if (!gameStarted || gameOverFlag) return;
+  obstacles.push({ x: canvas.width, y: ground - 40, width: 40, height: 40 });
 }
 
-// Fim do jogo
-function endGame() {
-  gameOver = true;
-  ctx.fillStyle = "black";
-  ctx.font = "30px Arial";
-  ctx.fillText("Game Over!", canvas.width / 2 - 80, canvas.height / 2);
-  if (playerName) salvarPontuacao(playerName, score);
+// Checar colisão
+function checkCollision(o) {
+  return (
+    mario.x < o.x + o.width &&
+    mario.x + mario.width > o.x &&
+    mario.y < o.y + o.height &&
+    mario.y + mario.height > o.y
+  );
 }
 
-// Salvar no Firebase
-async function salvarPontuacao(nome, pontos) {
-  await set(ref(db, "ranking/" + nome), { pontos: pontos });
-  carregarRanking();
+// Salvar pontuação
+async function saveScore() {
+  await set(ref(db, "ranking/" + playerName), { pontos: score });
+  loadRanking();
 }
 
 // Carregar ranking
-async function carregarRanking() {
-  const dbRef = ref(db);
-  const snapshot = await get(child(dbRef, "ranking"));
+async function loadRanking() {
+  const snapshot = await get(ref(db, "ranking"));
   rankingDiv.innerHTML = "<h3>Ranking</h3>";
-
   if (snapshot.exists()) {
     let dados = snapshot.val();
     let lista = Object.entries(dados).sort((a, b) => b[1].pontos - a[1].pontos);
@@ -176,7 +115,64 @@ async function carregarRanking() {
   }
 }
 
-// Inicia tudo
-window.onload = () => {
-  initGame();
-};
+// Fim de jogo
+function gameOver() {
+  gameOverFlag = true;
+  deathSound.play();
+  marioImg.src = marioDeadImg.src;
+  saveScore();
+}
+
+// --- Loop do jogo ---
+function gameLoop() {
+  if (!gameStarted) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Background
+  ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+
+  // Mario
+  mario.vy += gravity;
+  mario.y += mario.vy;
+  if (mario.y >= ground - mario.height) {
+    mario.y = ground - mario.height;
+    mario.jumping = false;
+  }
+  ctx.drawImage(marioImg, mario.x, mario.y, mario.width, mario.height);
+
+  // Obstáculos
+  obstacles.forEach((o, i) => {
+    o.x -= speed;
+    ctx.drawImage(obstacleImg, o.x, o.y, o.width, o.height);
+
+    if (checkCollision(o)) {
+      hitSound.play();
+      gameOver();
+    }
+
+    if (o.x + o.width < 0) obstacles.splice(i, 1);
+  });
+
+  // Score
+  score++;
+  ctx.fillStyle = "black";
+  ctx.font = "20px Arial";
+  ctx.fillText("Pontos: " + score, 20, 30);
+
+  // Dificuldade progressiva
+  speed = 4 + score / 200;
+
+  if (!gameOverFlag) requestAnimationFrame(gameLoop);
+}
+
+// --- Eventos ---
+document.addEventListener("keydown", (e) => {
+  if (!gameStarted && e.code === "Space") startGame();
+  else if (gameStarted && e.code === "Space") jump();
+});
+
+// Spawn de obstáculos
+setInterval(spawnObstacle, 2000);
+
+// --- Inicialização ---
+window.onload = () => { loadRanking(); };
