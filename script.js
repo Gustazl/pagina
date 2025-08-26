@@ -125,3 +125,165 @@ function updateFrame(dt) {
       // small bonus points when pass
       score += 25;
     }
+
+    // collision detection: use bounding boxes
+    const mRect = marioEl.getBoundingClientRect();
+    const oRect = o.el.getBoundingClientRect();
+    if (mRect.right > oRect.left + 5 && mRect.left < oRect.right - 5 &&
+        mRect.bottom > oRect.top + 10) {
+      onCollision();
+      return;
+    }
+  }
+
+  // mario physics (vy, gravity), bottom anchored to ground
+  vy += gravity * (dt/16.67);
+  let bottomPx = parseFloat(marioEl.style.bottom || marioBottom+'px');
+  bottomPx += vy * (dt/16.67);
+  const floorY = marioBottom;
+  if (bottomPx <= floorY) {
+    bottomPx = floorY;
+    vy = 0;
+    isJumping = false;
+  }
+  marioEl.style.bottom = bottomPx + 'px';
+
+  // increment score continuous
+  score += Math.round( (dt/16.67) * 5 ); // roughly +5 per frame at 60fps => ~300 per second; adjust if too fast
+  // clamp to avoid runaway in tests
+  score = Math.max(0, Math.floor(score));
+
+  // sky phase change every 1000 points
+  const targetPhase = Math.floor(score / 1000) % skyPhases.length;
+  if (targetPhase !== currentSkyIdx) {
+    currentSkyIdx = targetPhase;
+    sky.style.background = skyPhases[currentSkyIdx].css;
+    phaseEl.textContent = `Fase: ${skyPhases[currentSkyIdx].name}`;
+  }
+
+  // update HUD
+  scoreEl.textContent = `Score: ${score}`;
+
+}
+
+// on collision -> stop game and save
+function onCollision() {
+  if (gameOver) return;
+  gameOver = true;
+
+  // play hit + death
+  try{ hitSound.currentTime = 0; hitSound.play(); }catch(e){}
+  setTimeout(()=>{ try{ deathSound.play(); }catch(e){} }, 200);
+
+  // flash mario to dead sprite briefly (use dead image)
+  const prevSrc = marioEl.src;
+  marioEl.src = 'https://i.imgur.com/rAD2ZZ2.png';
+
+  // save to ranking under playerName (unique enforced at start)
+  saveToRanking(playerName, score);
+
+  // show game over dialog using prompt/alert simple for now
+  setTimeout(()=> {
+    alert(`Game Over — ${playerName}\nPontuação: ${score}`);
+    // reload page to allow replay with new name if wanted
+    window.location.reload();
+  }, 600);
+}
+
+// jump handler
+function tryJump() {
+  if (!gameStarted || gameOver) return;
+  if (isJumping) return;
+  isJumping = true;
+  vy = -18; // jump impulse stronger for faster game
+  try{ jumpSound.currentTime = 0; jumpSound.play(); }catch(e){}
+}
+
+// main loop using RAF
+let lastTime = null;
+function rafLoop(ts) {
+  if (!lastTime) lastTime = ts;
+  const dt = ts - lastTime;
+  lastTime = ts;
+
+  updateFrame(dt);
+
+  if (!gameOver) requestAnimationFrame(rafLoop);
+}
+
+// spawn controller
+function spawnController(ts) {
+  if (!gameStarted || gameOver) return;
+  const now = Date.now();
+  if (now - lastSpawn > spawnIntervalMs * (1 - Math.min(0.6, score/5000))) {
+    spawnObstacle();
+    lastSpawn = now;
+  }
+  // keep spawning check alive
+  setTimeout(spawnController, 200);
+}
+
+// start game after valid name
+function startGameFor(name) {
+  playerName = name;
+  // show game area
+  startScreen.classList.add('hidden');
+  gameDiv.classList.remove('hidden');
+  // reset stats
+  score = 0; gameOver = false; gameStarted = true;
+  obstacles.forEach(o=> o.el.remove());
+  obstacles = [];
+  vy = 0; isJumping = false;
+  // place mario to ground
+  marioEl.style.bottom = marioBottom + 'px';
+  marioEl.style.left = (window.innerWidth * 0.12) + 'px';
+  // initial sky
+  currentSkyIdx = 0;
+  sky.style.background = skyPhases[currentSkyIdx].css;
+  phaseEl.textContent = `Fase: ${skyPhases[currentSkyIdx].name}`;
+  loadRanking(); // refresh ranking
+  lastSpawn = Date.now() + 300;
+  // start loops
+  requestAnimationFrame(rafLoop);
+  spawnController();
+}
+
+// BIND UI: start button & name input
+startBtn.addEventListener('click', ()=>{
+  const name = (nameInput.value||'').trim();
+  if (!name) { alert('Digite um nome válido'); return; }
+  if (isNameExists(name)) { alert('Nome já existente, utilize outro'); return; }
+  startGameFor(name);
+});
+nameInput.addEventListener('keydown', (e)=>{
+  if (e.key === 'Enter') {
+    startBtn.click();
+  }
+});
+
+// keyboard for jump: space
+document.addEventListener('keydown', (e)=>{
+  if (e.code === 'Space') {
+    // if not started, do nothing; name required before starting
+    if (!gameStarted) {
+      // optional: if name present and space pressed, start
+      const name = (nameInput.value||'').trim();
+      if (name && !isNameExists(name)) {
+        startBtn.click();
+      }
+      e.preventDefault();
+      return;
+    }
+    // prevent page scroll
+    e.preventDefault();
+    tryJump();
+  }
+});
+
+// make sure ranking is loaded initially
+loadRanking();
+
+// responsive: adjust mario size bottom when resize
+window.addEventListener('resize', ()=>{
+  // nothing heavy required; css uses vw for width
+});
