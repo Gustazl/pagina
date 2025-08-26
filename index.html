@@ -1,19 +1,32 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mario Runner</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mario Runner Firebase</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Firebase -->
+  <script type="module" src="script.js" defer></script>
 </head>
 <body>
-  <div class="game-container" id="game">
-    <img src="https://www.nicepng.com/png/full/169-1691582_mario-pixel-jump-super-mario-world-mario-jumping.png" id="mario" class="mario" />
-    <img src="https://w7.pngwing.com/pngs/449/97/png-transparent-green-bar-with-paint-palette-illustration-super-mario-bros-new-super-mario-bros-super-paper-mario-mario-bros-angle-super-mario-bros-rectangle-thumbnail.png" class="obstacle" id="obstacle" />
-    <div class="score">Score: <span id="score"><b>0</b></span></div>
-    <div class="phase" id="phase"><b>Fase: Manhã</b></div>
+  <div id="start-screen">
+    <h1>Mario Runner</h1>
+    <input id="playerName" placeholder="Digite seu nome">
+    <button id="startBtn">Começar</button>
   </div>
 
-  <script src="script.js"></script>
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="gameOverModal" class="hidden">
+    <h2>Game Over!</h2>
+    <p>Sua pontuação: <span id="finalScore"></span></p>
+    <button id="saveScoreBtn">Salvar</button>
+    <button id="restartBtn">Reiniciar</button>
+  </div>
+
+  <div id="ranking">
+    <h3>Ranking</h3>
+    <ol id="rankingList"></ol>
+  </div>
 </body>
 </html>

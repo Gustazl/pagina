@@ -1,65 +1,42 @@
-* {
+body {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background: linear-gradient(to top, #87ceeb, #fff);
 }
 
-body {
-  font-family: sans-serif;
-  background-color: #87ceeb; /* Manhã */
-  overflow: hidden;
+#gameCanvas {
+  display: block;
+  margin: 20px auto;
+  background: #cceeff;
+  border: 2px solid #000;
 }
 
-.game-container {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+#start-screen {
+  margin-top: 20px;
 }
 
-.mario {
-  width: 80px;
-  position: absolute;
-  bottom: 0;
-  left: 50px;
-  z-index: 2;
-  transition: transform 0.2s;
+#gameOverModal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border: 2px solid #000;
+  border-radius: 8px;
 }
 
-.jump {
-  animation: jump 0.5s ease-out;
+.hidden {
+  display: none;
 }
 
-@keyframes jump {
-  0% { bottom: 0; }
-  50% { bottom: 150px; }
-  100% { bottom: 0; }
-}
-
-.obstacle {
-  width: 60px;
-  position: absolute;
-  bottom: 0;
-  right: -60px;
-  z-index: 2;
-  animation: moveObstacle 1.2s linear infinite; /* Mais rápido */
-}
-
-@keyframes moveObstacle {
-  from { right: -60px; }
-  to { right: 100vw; }
-}
-
-.score, .phase {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  font-size: 24px;
-  color: white;
-  z-index: 3;
-  font-weight: bold;
-}
-
-.phase {
-  top: 60px;
+#ranking {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(255,255,255,0.8);
+  padding: 10px;
+  border-radius: 8px;
 }
