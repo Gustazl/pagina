@@ -27,7 +27,7 @@ const jump = () => {
 
 // Atualizar pontuação e fases
 const pontosInterval = setInterval(() => {
-    pontos += fase; 
+    pontos += fase;
     pontosDisplay.textContent = pontos;
 
     if (pontos % 50 === 0) {
@@ -40,7 +40,7 @@ const pontosInterval = setInterval(() => {
         pipe.style.animationDuration = `${newPipeSpeed}s`;
 
         // Aceleração nuvens
-        clouds.forEach((cloud, i) => {
+        clouds.forEach(cloud => {
             let speed = parseFloat(cloud.style.animationDuration) - 1;
             if (speed < 5) speed = 5;
             cloud.style.animationDuration = `${speed}s`;

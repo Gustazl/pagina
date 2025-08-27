@@ -27,6 +27,7 @@
     width: 150px;
     position: absolute;
     bottom: 0;
+    z-index: 10;
 }
 
 .pipe {
@@ -34,13 +35,12 @@
     bottom: 0;
     width: 80px;
     animation: pipe-animation 1.5s infinite linear;
+    z-index: 5;
 }
 
 /* Nuvens */
 .cloud {
     position: absolute;
-    background: url('https://i.imgur.com/E6lpxQ0.png') no-repeat center;
-    background-size: contain;
     top: 50px;
     width: 120px;
     height: 70px;
@@ -102,7 +102,7 @@
     background: rgba(255,255,255,0.7);
     top: -20px;
     animation: rain-fall linear infinite;
-    z-index: 500;
+    z-index: 2;
 }
 
 @keyframes rain-fall {
