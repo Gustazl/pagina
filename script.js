@@ -113,9 +113,9 @@ function startGame() {
 // Atualiza background
 function updateBackground() {
   const body = document.body;
-  if (score % 3000 < 1000) {
+  if (score % 300 < 100) {
     body.style.background = "linear-gradient(to top, #87ceeb, #ffffff)"; // dia
-  } else if (score % 3000 < 2000) {
+  } else if (score % 300 < 200) {
     body.style.background = "linear-gradient(to top, #ff9966, #ffcc99)"; // pôr do sol
   } else {
     body.style.background = "linear-gradient(to top, #001f3f, #000000)"; // noite
