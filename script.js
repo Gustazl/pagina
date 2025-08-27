@@ -3,25 +3,15 @@ const pipe = document.querySelector('.pipe');
 const clouds = document.querySelectorAll('.cloud');
 const gameBoard = document.getElementById('gameBoard');
 
-const jumpSound = document.getElementById('jump-sound');
-const gameOverSound = document.getElementById('gameover-sound');
-const backgroundMusic = document.getElementById('bg-music');
-
 const pontosDisplay = document.getElementById('pontos');
 const faseDisplay = document.getElementById('fase');
 
 let pontos = 0;
 let fase = 1;
 
-// Toca música de fundo
-backgroundMusic.volume = 0.3;
-backgroundMusic.play();
-
 // Função pular
 const jump = () => {
     mario.classList.add('jump');
-    jumpSound.currentTime = 0;
-    jumpSound.play();
     setTimeout(() => mario.classList.remove('jump'), 500);
 };
 
@@ -54,22 +44,13 @@ const loop = setInterval(() => {
     const marioPosition = +window.getComputedStyle(mario).bottom.replace('px', '');
 
     if (pipePosition <= 120 && pipePosition > 0 && marioPosition < 80) {
-        // Congela cano
         pipe.style.animation = 'none';
-        pipe.style.left = `${pipePosition}px`;
-
-        // Congela Mario
         mario.style.animation = 'none';
-        mario.style.bottom = `${marioPosition}px`;
         mario.src = './img/game-over.png';
         mario.style.width = '75px';
-        mario.style.marginLeft = '50px'; 
-
+        mario.style.marginLeft = '50px';
         clearInterval(loop);
         clearInterval(pontosInterval);
-
-        gameOverSound.play();
-        backgroundMusic.pause();
     }
 }, 10);
 
@@ -91,13 +72,9 @@ function adicionarChuva() {
         drop.style.left = Math.random() * window.innerWidth + 'px';
         drop.style.animationDuration = 0.5 + Math.random() * 0.5 + 's';
         gameBoard.appendChild(drop);
-
         drop.addEventListener('animationend', () => drop.remove());
     }
 }
 
-// Alterna dia/noite a cada 30 segundos
 setInterval(mudarClima, 30000);
-
-// Adiciona chuva aleatória
 setInterval(() => { if (Math.random() > 0.5) adicionarChuva(); }, 5000);
