@@ -1,41 +1,32 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mario Runner</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="./js/script.js" defer></script>
+    <title>Mario Game</title>
 </head>
 <body>
+   <div class="game-board day" id="gameBoard">
+        <img src="./img/mario.gif" class="mario">
+        <img src="./img/pipe.png" class="pipe">
 
-<!-- Tela inicial -->
-<div id="startScreen">
-  <h1>Mario Runner</h1>
-  <h2>Projeto feito pelo 2°DDS</h2>
-  <input type="text" id="playerName" placeholder="Digite seu nome">
-  <button id="startBtn">Iniciar Jogo</button>
-  <p id="nameError"></p>
-</div>
+        <!-- Nuvens animadas -->
+        <div class="cloud cloud1"></div>
+        <div class="cloud cloud2"></div>
+        <div class="cloud cloud3"></div>
 
-<!-- Tela do jogo -->
-<div id="gameScreen" class="hidden">
-  <div id="gameArea">
-    <div id="ground"></div>
-    <img id="mario" src="https://i.imgur.com/QUcZYrn.gif" alt="Mario">
-    <img id="obstacle" src="https://i.imgur.com/rCrDOLe.png" alt="Obstáculo">
-  </div>
-  <p id="score">Pontuação: 0</p>
-</div>
+        <!-- Sons -->
+        <audio id="jump-sound" src="./audio/jump-up-245782.mp3"></audio>
+        <audio id="gameover-sound" src="./audio/8d82b5_SMW_Game_Over_Sound_Effect.mp3"></audio>
+        <audio id="bg-music" src="./audio/It's Me Mario! (Super Mario) - QuickSounds.com.mp3" loop></audio>
 
-<!-- Tela de game over -->
-<div id="gameOverScreen" class="hidden">
-  <h2>Game Over</h2>
-  <p id="finalScore"></p>
-  <h3>Ranking</h3>
-  <ol id="rankingList"></ol>
-  <button id="restartBtn">Jogar Novamente</button>
-</div>
-
-<script src="script.js"></script>
+        <!-- Scoreboard -->
+        <div class="score-board">
+            <h2>Fase: <span id="fase">1</span></h2>
+            <h2>Pontos: <span id="pontos">0</span></h2>
+        </div>
+   </div>
 </body>
 </html>

@@ -1,140 +1,103 @@
-// Elementos
-const startScreen = document.getElementById("startScreen");
-const gameScreen = document.getElementById("gameScreen");
-const gameOverScreen = document.getElementById("gameOverScreen");
-const startBtn = document.getElementById("startBtn");
-const restartBtn = document.getElementById("restartBtn");
-const playerNameInput = document.getElementById("playerName");
-const nameError = document.getElementById("nameError");
-const mario = document.getElementById("mario");
-const obstacle = document.getElementById("obstacle");
-const scoreDisplay = document.getElementById("score");
-const finalScore = document.getElementById("finalScore");
-const rankingList = document.getElementById("rankingList");
+const mario = document.querySelector('.mario');
+const pipe = document.querySelector('.pipe');
+const clouds = document.querySelectorAll('.cloud');
+const gameBoard = document.getElementById('gameBoard');
 
-// Sons
-const jumpSound = new Audio("https://cdn.pixabay.com/download/audio/2024/09/29/audio_3397905774.mp3?filename=jump-up-245782.mp3");
-const hitSound = new Audio("https://www.myinstants.com/media/sounds/roblox-death-sound_1.mp3");
-const defeatSound = new Audio("https://www.myinstants.com/media/sounds/super-mario-bros_2.mp3");
+const jumpSound = document.getElementById('jump-sound');
+const gameOverSound = document.getElementById('gameover-sound');
+const backgroundMusic = document.getElementById('bg-music');
 
-// Variáveis
-let playerName = "";
-let score = 0;
-let isJumping = false;
-let gameInterval;
-let obstacleSpeed = 10;
-let ranking = JSON.parse(localStorage.getItem("ranking")) || [];
+const pontosDisplay = document.getElementById('pontos');
+const faseDisplay = document.getElementById('fase');
 
-// Função iniciar jogo
-startBtn.addEventListener("click", () => {
-  const name = playerNameInput.value.trim();
-  if (!name) { nameError.textContent = "Digite um nome!"; return; }
-  if (ranking.some(r => r.name === name)) { nameError.textContent = "Nome já existente!"; return; }
-  playerName = name;
-  startScreen.classList.add("hidden");
-  gameScreen.classList.remove("hidden");
-  startGame();
-});
+let pontos = 0;
+let fase = 1;
 
-function startGame() {
-  score = 0;
-  obstacleSpeed = 10;
-  mario.src = "https://i.imgur.com/QUcZYrn.gif";
-  document.addEventListener("keydown", handleJump);
-  moveObstacle();
-  gameInterval = setInterval(updateGame, 50);
-}
+// Toca música de fundo
+backgroundMusic.volume = 0.3;
+backgroundMusic.play();
 
-function handleJump(e) {
-  if (e.code === "Space" && !isJumping) { jump(); }
-}
+// Função pular
+const jump = () => {
+    mario.classList.add('jump');
+    jumpSound.currentTime = 0;
+    jumpSound.play();
+    setTimeout(() => mario.classList.remove('jump'), 500);
+};
 
-function jump() {
-  isJumping = true;
-  let position = 0;
-  jumpSound.play();
-  const upInterval = setInterval(() => {
-    if (position >= 150) {
-      clearInterval(upInterval);
-      const downInterval = setInterval(() => {
-        if (position <= 0) {
-          clearInterval(downInterval);
-          isJumping = false;
-        } else {
-          position -= 20;
-          mario.style.bottom = 40 + position + "px";
-        }
-      }, 20);
-    } else {
-      position += 20;
-      mario.style.bottom = 40 + position + "px";
+// Atualizar pontuação e fases
+const pontosInterval = setInterval(() => {
+    pontos += fase; 
+    pontosDisplay.textContent = pontos;
+
+    if (pontos % 50 === 0) {
+        fase += 1;
+        faseDisplay.textContent = fase;
+
+        // Aceleração do cano
+        let newPipeSpeed = 1.5 - (fase * 0.1);
+        if (newPipeSpeed < 0.3) newPipeSpeed = 0.3;
+        pipe.style.animationDuration = `${newPipeSpeed}s`;
+
+        // Aceleração nuvens
+        clouds.forEach((cloud, i) => {
+            let speed = parseFloat(cloud.style.animationDuration) - 1;
+            if (speed < 5) speed = 5;
+            cloud.style.animationDuration = `${speed}s`;
+        });
     }
-  }, 20);
-}
+}, 1000);
 
-function moveObstacle() {
-  let obstaclePosition = window.innerWidth;
-  const moveInterval = setInterval(() => {
-    if (obstaclePosition < -60) { 
-      obstaclePosition = window.innerWidth; 
-      score += 100; 
-      scoreDisplay.textContent = "Pontuação: " + score; 
-      if (score % 500 === 0) obstacleSpeed += 2; 
-      if (score % 1000 === 0) changeBackground(); 
+// Loop do jogo
+const loop = setInterval(() => {
+    const pipePosition = pipe.offsetLeft;
+    const marioPosition = +window.getComputedStyle(mario).bottom.replace('px', '');
+
+    if (pipePosition <= 120 && pipePosition > 0 && marioPosition < 80) {
+        // Congela cano
+        pipe.style.animation = 'none';
+        pipe.style.left = `${pipePosition}px`;
+
+        // Congela Mario
+        mario.style.animation = 'none';
+        mario.style.bottom = `${marioPosition}px`;
+        mario.src = './img/game-over.png';
+        mario.style.width = '75px';
+        mario.style.marginLeft = '50px'; 
+
+        clearInterval(loop);
+        clearInterval(pontosInterval);
+
+        gameOverSound.play();
+        backgroundMusic.pause();
     }
-    // Colisão
-    if (
-      obstaclePosition < 130 && obstaclePosition > 50 &&
-      parseInt(mario.style.bottom) < 100
-    ) { 
-      clearInterval(moveInterval); 
-      endGame(); 
+}, 10);
+
+document.addEventListener('keydown', jump);
+
+// Dia/Noite e chuva
+let clima = 'day';
+
+function mudarClima() {
+    clima = clima === 'day' ? 'night' : 'day';
+    gameBoard.className = `game-board ${clima}`;
+}
+
+function adicionarChuva() {
+    if (clima !== 'night') return;
+    for (let i = 0; i < 50; i++) {
+        const drop = document.createElement('div');
+        drop.classList.add('rain');
+        drop.style.left = Math.random() * window.innerWidth + 'px';
+        drop.style.animationDuration = 0.5 + Math.random() * 0.5 + 's';
+        gameBoard.appendChild(drop);
+
+        drop.addEventListener('animationend', () => drop.remove());
     }
-    obstacle.style.left = obstaclePosition + "px";
-    obstaclePosition -= obstacleSpeed;
-  }, 20);
 }
 
-function updateGame() { scoreDisplay.textContent = "Pontuação: " + score; }
+// Alterna dia/noite a cada 30 segundos
+setInterval(mudarClima, 30000);
 
-function endGame() {
-  clearInterval(gameInterval);
-  mario.src = "https://i.imgur.com/rAD2ZZ2.png";
-  hitSound.play();
-  defeatSound.play();
-  ranking.push({ name: playerName, score });
-  ranking.sort((a, b) => b.score - a.score);
-  localStorage.setItem("ranking", JSON.stringify(ranking.slice(0,5)));
-  showGameOver();
-}
-
-function showGameOver() {
-  gameScreen.classList.add("hidden");
-  gameOverScreen.classList.remove("hidden");
-  finalScore.textContent = `Pontuação final: ${score}`;
-  rankingList.innerHTML = "";
-  ranking.forEach(r => {
-    const li = document.createElement("li");
-    li.textContent = `${r.name} - ${r.score}`;
-    rankingList.appendChild(li);
-  });
-}
-
-// Reiniciar jogo
-restartBtn.addEventListener("click", () => {
-  gameOverScreen.classList.add("hidden");
-  startScreen.classList.remove("hidden");
-  playerNameInput.value = "";
-  nameError.textContent = "";
-});
-
-// Fundo dinâmico
-function changeBackground() {
-  const colors = [
-    "linear-gradient(to bottom, #87ceeb, #ffffff)",
-    "linear-gradient(to bottom, #ff9966, #ffcc66)",
-    "linear-gradient(to bottom, #001f3f, #000000)"
-  ];
-  const index = Math.floor(score / 1000) % colors.length;
-  document.getElementById("gameArea").style.background = colors[index];
-}
+// Adiciona chuva aleatória
+setInterval(() => { if (Math.random() > 0.5) adicionarChuva(); }, 5000);

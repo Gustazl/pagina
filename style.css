@@ -1,23 +1,110 @@
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: Arial, sans-serif; text-align: center; background: linear-gradient(to top, #87ceeb, #ffffff); height: 100vh; overflow: hidden; }
-.hidden { display: none; }
-
-/* Tela inicial */
-#startScreen {
-  position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
-#startScreen input { padding: 10px; font-size: 16px; }
-#startScreen button { padding: 10px 20px; font-size: 16px; margin-top: 10px; }
-#nameError { color: red; margin-top: 10px; }
 
-/* Jogo */
-#gameArea { position: relative; width: 100vw; height: 80vh; margin: auto; overflow: hidden; background: transparent; }
-#ground { position: absolute; bottom: 0; width: 100%; height: 40px; background: green; }
-#mario { position: absolute; bottom: 40px; left: 50px; width: 80px; }
-#obstacle { position: absolute; bottom: 40px; right: -60px; width: 60px; }
-#score { font-size: 24px; margin-top: 10px; }
+.game-board {
+    width: 100%;
+    height: 500px;
+    border-bottom: 15px solid rgb(1, 255, 69);
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(#156c8f, #adccd8);
+    transition: background 2s;
+}
 
-/* Tela Game Over */
-#gameOverScreen {
-  position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%);
+.game-board.day {
+    background: linear-gradient(#156c8f, #adccd8);
+}
+
+.game-board.night {
+    background: linear-gradient(#0b1d3a, #2b3a57);
+}
+
+.mario {
+    width: 150px;
+    position: absolute;
+    bottom: 0;
+}
+
+.pipe {
+    position: absolute;
+    bottom: 0;
+    width: 80px;
+    animation: pipe-animation 1.5s infinite linear;
+}
+
+/* Nuvens */
+.cloud {
+    position: absolute;
+    background: url('https://i.imgur.com/E6lpxQ0.png') no-repeat center;
+    background-size: contain;
+    top: 50px;
+    width: 120px;
+    height: 70px;
+    animation: moveClouds 40s linear infinite;
+    z-index: 1;
+}
+
+.cloud2 {
+    top: 100px;
+    width: 160px;
+    height: 90px;
+    animation-duration: 60s;
+}
+
+.cloud3 {
+    top: 150px;
+    width: 100px;
+    height: 60px;
+    animation-duration: 50s;
+}
+
+@keyframes moveClouds {
+    from { left: -250px; }
+    to { left: 100%; }
+}
+
+.jump {
+    animation: jump 500ms ease-out;
+}
+
+@keyframes pipe-animation {
+    from { right: -80%; }
+    to { right: 100%; }
+}
+
+@keyframes jump {
+    0% { bottom: 0; }
+    40%,50%,60% { bottom: 180px; }
+    100% { bottom: 0; }
+}
+
+/* Scoreboard */
+.score-board {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(255,255,255,0.7);
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-family: Arial, sans-serif;
+    z-index: 1000;
+}
+
+/* Chuva */
+.rain {
+    position: absolute;
+    width: 2px;
+    height: 15px;
+    background: rgba(255,255,255,0.7);
+    top: -20px;
+    animation: rain-fall linear infinite;
+    z-index: 500;
+}
+
+@keyframes rain-fall {
+    to { transform: translateY(600px); }
 }
