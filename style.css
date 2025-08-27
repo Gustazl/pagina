@@ -2,10 +2,13 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: Arial, sans-serif;
 }
 
 body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background: linear-gradient(to top, #87ceeb, #ffffff);
+  height: 100vh;
   overflow: hidden;
 }
 
@@ -13,88 +16,71 @@ body {
   display: none;
 }
 
-#start-screen, #ranking-screen {
+/* Tela inicial */
+#startScreen {
   position: absolute;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: linear-gradient(to bottom, #87ceeb, #ffffff);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
-#start-screen h1 {
-  font-size: 3em;
-  margin-bottom: 10px;
-}
-
-#start-screen h2 {
-  font-size: 1.5em;
-  margin-bottom: 20px;
-}
-
-#start-screen input {
+#startScreen input {
   padding: 10px;
-  font-size: 1em;
-  margin-bottom: 10px;
+  font-size: 16px;
 }
 
-#start-screen button {
+#startScreen button {
   padding: 10px 20px;
-  font-size: 1em;
-  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
 }
 
-.error {
+#nameError {
   color: red;
   margin-top: 10px;
 }
 
-#game {
+/* Jogo */
+#gameArea {
+  position: relative;
   width: 100vw;
-  height: 100vh;
-  background: linear-gradient(to bottom, #87ceeb, #ffffff);
-  position: relative;
+  height: 80vh;
+  margin: auto;
   overflow: hidden;
-}
-
-#scoreboard {
-  position: absolute;
-  top: 10px; left: 10px;
-  font-size: 1.2em;
-  color: #000;
-}
-
-#game-area {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-#mario {
-  position: absolute;
-  bottom: 50px;
-  left: 100px;
-  width: 80px;
-}
-
-#obstacle {
-  position: absolute;
-  bottom: 50px;
-  right: -100px;
-  width: 80px;
+  background: transparent;
 }
 
 #ground {
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 50px;
+  height: 40px;
   background: green;
 }
 
-#ranking-screen ol {
-  font-size: 1.2em;
-  margin-bottom: 20px;
+#mario {
+  position: absolute;
+  bottom: 40px;
+  left: 50px;
+  width: 80px;
+}
+
+#obstacle {
+  position: absolute;
+  bottom: 40px;
+  right: -60px;
+  width: 60px;
+}
+
+#score {
+  font-size: 24px;
+  margin-top: 10px;
+}
+
+/* Tela Game Over */
+#gameOverScreen {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
