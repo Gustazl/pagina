@@ -1,45 +1,40 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mario Runner Turbo</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mario Runner</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- START / NAME SCREEN -->
-  <div id="startScreen" class="screen">
+  <!-- Tela inicial -->
+  <div id="start-screen">
     <h1>Mario Runner</h1>
-    <h3>Projeto feito pelo 2°DDS</h3>
-
-    <input id="nameInput" type="text" placeholder="Digite seu nome (único)" maxlength="20" />
-    <div class="hint">Digite o nome e pressione <strong>ENTER</strong> ou clique em <strong>Começar</strong></div>
-    <div class="controls">
-      <button id="startBtn">Começar</button>
-    </div>
-
-    <p class="small">Observação: nomes duplicados não são permitidos.</p>
+    <h2>Projeto feito pelo 2°DDS</h2>
+    <input type="text" id="playerName" placeholder="Digite seu nome">
+    <button id="startBtn">Iniciar Jogo</button>
+    <p id="nameError" class="error"></p>
   </div>
 
-  <!-- GAME -->
+  <!-- Tela do jogo -->
   <div id="game" class="hidden">
-    <div id="sky"></div>
-    <div id="ground"></div>
-
-    <!-- personagem e obstáculos são elementos DOM para facilidade -->
-    <img id="mario" src="https://i.imgur.com/QUcZYrn.gif" alt="Mario" draggable="false">
-    <div id="obstaclesContainer"></div>
-
-    <div id="hud">
-      <div id="score">Score: 0</div>
-      <div id="phase">Fase: Manhã</div>
+    <div id="scoreboard">
+      <span id="score">Pontuação: 0</span>
     </div>
-
-    <div id="rankingBox">
-      <h4>🏆 Ranking (Top 10)</h4>
-      <ol id="rankingList"></ol>
+    <div id="game-area">
+      <img id="mario" src="https://i.imgur.com/QUcZYrn.gif" alt="Mario">
+      <img id="obstacle" src="https://i.imgur.com/rCrDOLe.png" alt="Obstáculo">
+      <div id="ground"></div>
     </div>
   </div>
 
-  <!-- SONS -->
-  <audio id="jumpSound" src="https://cdn.pixabay.com/download/audio/2024/09/29/audio_3397905774.mp3?filename=jump-u_
+  <!-- Ranking -->
+  <div id="ranking-screen" class="hidden">
+    <h2>Ranking</h2>
+    <ol id="rankingList"></ol>
+    <button onclick="restartGame()">Jogar Novamente</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
