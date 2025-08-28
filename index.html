@@ -1,33 +1,62 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Mario Runner</title>
-  <link rel="stylesheet" href="style.css">
-  <script type="module" src="script.js" defer></script>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Firebase (Compat: funciona sem type="module" e abrindo localmente) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 </head>
 <body>
-  <!-- Tela inicial -->
-  <div id="start-screen">
-    <h1>Bem-vindo ao Mario Runner</h1>
-    <input type="text" id="player-name" placeholder="Digite seu nome">
-    <button id="start-btn">Iniciar Jogo</button>
+  <!-- TELA INICIAL -->
+  <div id="start-screen" class="screen">
+    <h1>Mario Runner</h1>
+    <h3>Projeto feito pelo 2°DDS</h3>
+    <input id="playerName" type="text" placeholder="Digite seu nome" maxlength="20" />
+    <button id="startBtn">Iniciar Jogo</button>
+    <p id="nameError" class="error"></p>
   </div>
 
-  <!-- Tela do jogo -->
+  <!-- TELA DO JOGO -->
   <div id="game-screen" class="hidden">
-    <div class="game-board">
-      <img src="mario.gif" class="mario" id="mario">
-      <img src="pipe.png" class="pipe" id="pipe">
+    <div class="game-board day" id="gameBoard">
+      <img src="mario.gif" class="mario" id="mario" alt="Mario" />
+      <img src="pipe.png" class="pipe" id="pipe" alt="Obstáculo" />
+
+      <!-- NUVENS (como no do seu amigo) -->
+      <img src="clouds.png" class="clouds clouds-a" alt="Nuvens" />
+      <img src="clouds.png" class="clouds clouds-b" alt="Nuvens" />
+
+      <!-- Sons -->
+      <audio id="jump-sound" src="jump-up-245782.mp3"></audio>
+      <audio id="gameover-sound" src="8d82b5_SMW_Game_Over_Sound_Effect.mp3"></audio>
+
+      <!-- Placar -->
+      <div class="score-board">
+        <h2>Fase: <span id="fase">1</span></h2>
+        <h2>Pontos: <span id="pontos">0</span></h2>
+      </div>
     </div>
-    <p id="score">Pontuação: 0</p>
   </div>
 
-  <!-- Tela de ranking -->
-  <div id="ranking-screen" class="hidden">
-    <h2>Ranking</h2>
-    <ul id="ranking-list"></ul>
-    <button id="retry-btn">Jogar Novamente</button>
+  <!-- TELA GAME OVER + RANKING -->
+  <div id="ranking-screen" class="screen hidden">
+    <h2>Game Over</h2>
+    <p id="finalScore">Sua pontuação: 0</p>
+
+    <h3>🏆 Ranking</h3>
+    <ol id="rankingList"></ol>
+
+    <div class="actions">
+      <button id="retryBtn">Jogar Novamente</button>
+      <button id="clearBtn">Limpar Ranking</button>
+    </div>
+
+    <p class="hint">* Se o Firebase não estiver configurado, o ranking usa o seu navegador (localStorage).</p>
   </div>
+
+  <script src="script.js" defer></script>
 </body>
 </html>
