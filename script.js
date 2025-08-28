@@ -1,135 +1,133 @@
-// Importa Firebase
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, set, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-// Configuração do Firebase
+// Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyAMwEcrs7DnNNuBAsJJq83LHpQILubCKUg",
-  authDomain: "projeto-feira-d-ciencias-mario.firebaseapp.com",
-  databaseURL: "https://projeto-feira-d-ciencias-mario-default-rtdb.firebaseio.com",
-  projectId: "projeto-feira-d-ciencias-mario",
-  storageBucket: "projeto-feira-d-ciencias-mario.appspot.com",
-  messagingSenderId: "598294976090",
-  appId: "1:598294976090:web:bd480d135fe947da1eaa63",
-  measurementId: "G-3MP6ZD8JZH"
+    apiKey: "AIzaSyAMwEcrs7DnNNuBAsJJq83LHpQILubCKUg",
+    authDomain: "projeto-feira-d-ciencias-mario.firebaseapp.com",
+    databaseURL: "https://projeto-feira-d-ciencias-mario-default-rtdb.firebaseio.com",
+    projectId: "projeto-feira-d-ciencias-mario",
+    storageBucket: "projeto-feira-d-ciencias-mario.appspot.com",
+    messagingSenderId: "598294976090",
+    appId: "1:598294976090:web:bd480d135fe947da1eaa63",
+    measurementId: "G-3MP6ZD8JZH"
 };
-
-// Inicializa Firebase
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
 
 // Elementos
-const startScreen = document.getElementById("start-screen");
-const gameBoard = document.getElementById("game-board");
-const rankingScreen = document.getElementById("ranking-screen");
-const mario = document.getElementById("mario");
-const pipe = document.getElementById("pipe");
-const scoreEl = document.getElementById("score");
-const startBtn = document.getElementById("start-btn");
-const restartBtn = document.getElementById("restart-btn");
-const playerNameInput = document.getElementById("player-name");
-const nameWarning = document.getElementById("name-warning");
+const mario = document.querySelector('.mario');
+const pipe = document.querySelector('.pipe');
+const clouds = document.querySelector('.clouds');
+const gameBoard = document.getElementById('gameBoard');
+const startMenu = document.getElementById('startMenu');
+const startBtn = document.getElementById('startBtn');
+const nameInput = document.getElementById('nameInput');
+const playerNameDisplay = document.getElementById('playerName');
+const pontosDisplay = document.getElementById('pontos');
+const rankingList = document.getElementById('rankingList');
 
-let score = 0;
+const jumpSound = document.getElementById('jump-sound');
+const gameOverSound = document.getElementById('gameover-sound');
+
+let pontos = 0;
+let isJumping = false;
 let gameInterval;
-let playerName = "";
 
-// Função para verificar se nome já existe
-async function nomeJaExiste(nome) {
-  const rankingRef = ref(db, "ranking");
-  const snapshot = await get(rankingRef);
-  if (snapshot.exists()) {
-    const dados = snapshot.val();
-    return Object.values(dados).some(item => item.nome === nome);
-  }
-  return false;
-}
+// Iniciar Jogo
+startBtn.addEventListener('click', () => {
+    const name = nameInput.value.trim();
+    if (!name) { alert('Digite um nome!'); return; }
 
-// Salvar no ranking
-function salvarNoRanking(nome, pontos) {
-  const rankingRef = ref(db, "ranking");
-  const novoRegistro = push(rankingRef);
-
-  set(novoRegistro, { nome, pontos });
-}
-
-// Mostrar ranking
-async function carregarRanking() {
-  const rankingRef = ref(db, "ranking");
-  const snapshot = await get(rankingRef);
-  const lista = document.getElementById("ranking-list");
-  lista.innerHTML = "";
-
-  if (snapshot.exists()) {
-    const dados = snapshot.val();
-    const rankingArray = Object.values(dados).sort((a, b) => b.pontos - a.pontos);
-
-    rankingArray.forEach((item, index) => {
-      const li = document.createElement("li");
-      li.textContent = `${index + 1}. ${item.nome} - ${item.pontos} pontos`;
-      lista.appendChild(li);
+    // Verifica se o nome já existe
+    database.ref('ranking/' + name).get().then(snapshot => {
+        if (snapshot.exists()) {
+            alert('Nome já existe! Ele será atualizado.');
+        }
+        // Salva ou atualiza nome
+        database.ref('ranking/' + name).set({ pontos: 0 });
+        playerNameDisplay.textContent = name;
+        startMenu.style.display = 'none';
+        startGame();
+        loadRanking();
     });
-  }
+});
+
+// Função pular
+const jump = () => {
+    if (isJumping) return;
+    isJumping = true;
+    mario.classList.add('jump');
+    jumpSound.currentTime = 0;
+    jumpSound.play();
+    setTimeout(() => {
+        mario.classList.remove('jump');
+        isJumping = false;
+    }, 500);
+};
+
+document.addEventListener('keydown', jump);
+
+// Loop do jogo
+function startGame() {
+    gameInterval = setInterval(() => {
+        const pipePosition = pipe.offsetLeft;
+        const marioPosition = +window.getComputedStyle(mario).bottom.replace('px','');
+
+        // Colisão
+        if (pipePosition <= 120 && pipePosition > 0 && marioPosition < 80) {
+            gameOver();
+        }
+
+        // Pontos
+        pontos++;
+        pontosDisplay.textContent = pontos;
+
+        // Atualiza no Firebase
+        const name = playerNameDisplay.textContent;
+        database.ref('ranking/' + name).set({ pontos: pontos });
+    }, 100);
 }
 
-// Iniciar jogo
-startBtn.addEventListener("click", async () => {
-  const nome = playerNameInput.value.trim();
-  if (nome === "") {
-    nameWarning.textContent = "Digite um nome!";
-    return;
-  }
-
-  if (await nomeJaExiste(nome)) {
-    nameWarning.textContent = "Esse nome já está no ranking!";
-    return;
-  }
-
-  playerName = nome;
-  nameWarning.textContent = "";
-
-  startScreen.style.display = "none";
-  gameBoard.style.display = "block";
-
-  score = 0;
-  scoreEl.textContent = "Pontuação: 0";
-
-  // Pontuação automática
-  gameInterval = setInterval(() => {
-    score++;
-    scoreEl.textContent = "Pontuação: " + score;
-  }, 100);
-});
-
-// Pular
-document.addEventListener("keydown", (e) => {
-  if (e.code === "Space") {
-    mario.classList.add("jump");
-
-    setTimeout(() => {
-      mario.classList.remove("jump");
-    }, 500);
-  }
-});
-
-// Verificar colisão
-setInterval(() => {
-  const pipePos = pipe.offsetLeft;
-  const marioPos = +window.getComputedStyle(mario).bottom.replace("px", "");
-
-  if (pipePos > 0 && pipePos < 120 && marioPos < 80) {
+// Game Over
+function gameOver() {
     clearInterval(gameInterval);
+    mario.src = './img/game-over.png';
+    mario.style.width = '75px';
+    mario.style.marginLeft = '50px';
+    pipe.style.animation = 'none';
+    gameOverSound.play();
+    loadRanking();
+}
 
-    salvarNoRanking(playerName, score);
+// Ranking
+function loadRanking() {
+    database.ref('ranking').get().then(snapshot => {
+        rankingList.innerHTML = '';
+        const data = snapshot.val();
+        if (!data) return;
+        const sorted = Object.entries(data).sort((a,b) => b[1].pontos - a[1].pontos);
+        sorted.forEach(([name, info]) => {
+            const li = document.createElement('li');
+            li.textContent = `${name}: ${info.pontos}`;
+            rankingList.appendChild(li);
+        });
+    });
+}
 
-    gameBoard.style.display = "none";
-    rankingScreen.style.display = "block";
-    carregarRanking();
-  }
-}, 10);
-
-// Reiniciar
-restartBtn.addEventListener("click", () => {
-  rankingScreen.style.display = "none";
-  startScreen.style.display = "block";
-});
+// Clima dia/noite e chuva
+let clima = 'day';
+function mudarClima() {
+    clima = clima === 'day' ? 'night' : 'day';
+    gameBoard.className = 'game-board ' + clima;
+}
+function adicionarChuva() {
+    if (clima !== 'night') return;
+    for (let i=0;i<50;i++){
+        const drop = document.createElement('div');
+        drop.classList.add('rain');
+        drop.style.left = Math.random() * window.innerWidth + 'px';
+        drop.style.animationDuration = 0.5 + Math.random()*0.5 + 's';
+        gameBoard.appendChild(drop);
+        drop.addEventListener('animationend', ()=>drop.remove());
+    }
+}
+setInterval(mudarClima, 30000);
+setInterval(() => { if(Math.random()>0.5) adicionarChuva(); }, 5000);

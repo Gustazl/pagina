@@ -1,35 +1,38 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jogo do Mario</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="./js/script.js" defer></script>
+    <title>Mario Game</title>
 </head>
 <body>
-  <!-- Tela inicial -->
-  <div id="start-screen">
-    <h1>Jogo do Mario</h1>
-    <input type="text" id="player-name" placeholder="Digite seu nome">
-    <button id="start-btn">Iniciar Jogo</button>
-    <p id="name-warning" class="warning"></p>
-  </div>
+    <div class="game-board day" id="gameBoard">
+        <img src="./img/mario.gif" class="mario">
+        <img src="./img/pipe.png" class="pipe">
+        <img src="./img/clouds.png" class="clouds">
 
-  <!-- Tela do jogo -->
-  <div class="game-board" id="game-board" style="display:none;">
-    <img src="clouds.png" class="clouds" alt="nuvens">
-    <img src="mario.gif" class="mario" id="mario" alt="mario">
-    <img src="pipe.png" class="pipe" id="pipe" alt="cano">
-    <div id="score">Pontuação: 0</div>
-  </div>
+        <audio id="jump-sound" src="./audio/jump-up-245782.mp3"></audio>
+        <audio id="gameover-sound" src="./audio/8d82b5_SMW_Game_Over_Sound_Effect.mp3"></audio>
+        
+        <div class="score-board">
+            <h2>Nome: <span id="playerName">---</span></h2>
+            <h2>Pontos: <span id="pontos">0</span></h2>
+        </div>
+    </div>
 
-  <!-- Tela de ranking -->
-  <div id="ranking-screen" style="display:none;">
-    <h2>Ranking</h2>
-    <ul id="ranking-list"></ul>
-    <button id="restart-btn">Jogar Novamente</button>
-  </div>
+    <div class="ranking-board" id="rankingBoard">
+        <h2>Ranking</h2>
+        <ul id="rankingList"></ul>
+    </div>
 
-  <script type="module" src="script.js"></script>
+    <div class="start-menu" id="startMenu">
+        <h1>Mario Game</h1>
+        <input type="text" id="nameInput" placeholder="Digite seu nome">
+        <button id="startBtn">Iniciar Jogo</button>
+    </div>
 </body>
 </html>
