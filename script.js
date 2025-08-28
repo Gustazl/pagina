@@ -1,170 +1,135 @@
-// Elementos
-const startScreen = document.getElementById("startScreen");
-const gameScreen = document.getElementById("gameScreen");
-const gameOverScreen = document.getElementById("gameOverScreen");
+// -------------------- Firebase Config --------------------
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
-const startBtn = document.getElementById("startBtn");
-const restartBtn = document.getElementById("restartBtn");
-const playerNameInput = document.getElementById("playerName");
-const nameError = document.getElementById("nameError");
+// 🔹 Troque pelos dados do seu Firebase
+const firebaseConfig = {
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_PROJETO.firebaseapp.com",
+  databaseURL: "https://SEU_PROJETO.firebaseio.com",
+  projectId: "SEU_PROJETO",
+  storageBucket: "SEU_PROJETO.appspot.com",
+  messagingSenderId: "SEU_ID",
+  appId: "SEU_APP_ID"
+};
 
-const mario = document.getElementById("mario");
-const obstacle = document.getElementById("obstacle");
-const scoreDisplay = document.getElementById("score");
-const finalScoreDisplay = document.getElementById("finalScore");
-const rankingList = document.getElementById("rankingList");
+// Inicializa Firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
+// -------------------- Variáveis Globais --------------------
 let playerName = "";
 let score = 0;
 let gameInterval;
-let obstacleInterval;
-let gravity = false;
 
-// Ranking no localStorage
-let ranking = JSON.parse(localStorage.getItem("ranking")) || [];
+// -------------------- Seletores --------------------
+const startScreen = document.getElementById("start-screen");
+const gameScreen = document.getElementById("game-screen");
+const rankingScreen = document.getElementById("ranking-screen");
 
-// Sons
-const jumpSound = new Audio("https://cdn.pixabay.com/download/audio/2024/09/29/audio_3397905774.mp3?filename=jump-up-245782.mp3");
-const hitSound = new Audio("https://www.myinstants.com/media/sounds/roblox-death-sound_1.mp3");
-const gameOverSound = new Audio("https://www.myinstants.com/media/sounds/super-mario-bros_2.mp3");
+const mario = document.getElementById("mario");
+const pipe = document.getElementById("pipe");
+const scoreText = document.getElementById("score");
+const rankingList = document.getElementById("ranking-list");
 
-// Iniciar jogo
-startBtn.onclick = () => {
-  const name = playerNameInput.value.trim();
-  if (!name) {
-    nameError.textContent = "Digite um nome!";
-    return;
-  }
-  if (ranking.find(r => r.name === name)) {
-    nameError.textContent = "Nome já existente, utilize outro!";
+// -------------------- Funções do Jogo --------------------
+document.getElementById("start-btn").addEventListener("click", () => {
+  const inputName = document.getElementById("player-name").value.trim();
+
+  if (inputName === "") {
+    alert("Digite seu nome!");
     return;
   }
 
-  playerName = name;
+  playerName = inputName;
   startScreen.classList.add("hidden");
   gameScreen.classList.remove("hidden");
-  startGame();
-};
 
-// Função de pulo
-function jump() {
-  if (gravity) return;
-  gravity = true;
-  mario.style.transition = "bottom 0.3s";
-  mario.style.bottom = "150px";
-  jumpSound.play();
+  iniciarJogo();
+});
 
-  setTimeout(() => {
-    mario.style.bottom = "40px";
-    setTimeout(() => gravity = false, 300);
-  }, 300);
-}
+document.getElementById("retry-btn").addEventListener("click", () => {
+  rankingScreen.classList.add("hidden");
+  startScreen.classList.remove("hidden");
+});
 
-// Detectar tecla espaço
+// Mario pula
 document.addEventListener("keydown", (e) => {
   if (e.code === "Space") {
     jump();
   }
 });
 
-// Inicia jogo
-function startGame() {
-  score = 0;
-  scoreDisplay.textContent = "Pontuação: 0";
-  mario.src = "https://i.imgur.com/QUcZYrn.gif";
-  obstacle.style.right = "-60px";
-
-  // Loop de pontuação
-  gameInterval = setInterval(() => {
-    score++;
-    scoreDisplay.textContent = "Pontuação: " + score;
-    updateBackground();
-  }, 100);
-
-  // Loop do obstáculo
-  obstacleInterval = setInterval(() => {
-    obstacle.style.right = "-60px";
-    const speed = Math.max(1000 - score * 2, 400); // mais rápido
-    obstacle.animate([{ right: "-60px" }, { right: "100vw" }], {
-      duration: speed,
-      iterations: 1
-    }).onfinish = () => {
-      if (obstacle.style.right !== "-60px") {
-        obstacle.style.right = "-60px";
-      }
-    };
-  }, 1500);
-
-  // Checar colisão
-  setInterval(() => {
-    const marioRect = mario.getBoundingClientRect();
-    const obstacleRect = obstacle.getBoundingClientRect();
-
-    if (
-      marioRect.right > obstacleRect.left &&
-      marioRect.left < obstacleRect.right &&
-      marioRect.bottom > obstacleRect.top
-    ) {
-      endGame();
-    }
-  }, 50);
-}
-
-// Atualiza background
-function updateBackground() {
-  const body = document.body;
-  if (score % 3000 < 1000) {
-    body.style.background = "linear-gradient(to top, #87ceeb, #ffffff)"; // dia
-  } else if (score % 3000 < 2000) {
-    body.style.background = "linear-gradient(to top, #ff9966, #ffcc99)"; // pôr do sol
-  } else {
-    body.style.background = "linear-gradient(to top, #001f3f, #000000)"; // noite
+function jump() {
+  if (!mario.classList.contains("jump")) {
+    mario.classList.add("jump");
+    setTimeout(() => {
+      mario.classList.remove("jump");
+    }, 600);
   }
 }
 
-// Finaliza jogo
-function endGame() {
-  clearInterval(gameInterval);
-  clearInterval(obstacleInterval);
-  hitSound.play();
-  gameOverSound.play();
-  mario.src = "https://i.imgur.com/rAD2ZZ2.png";
-  finalScoreDisplay.textContent = `Sua pontuação: ${score}`;
+function iniciarJogo() {
+  score = 0;
+  scoreText.textContent = "Pontuação: 0";
 
-  ranking.push({ name: playerName, score });
-  ranking.sort((a, b) => b.score - a.score);
-  localStorage.setItem("ranking", JSON.stringify(ranking));
+  gameInterval = setInterval(() => {
+    // posição dos elementos
+    const pipePosition = pipe.offsetLeft;
+    const marioPosition = +window.getComputedStyle(mario).bottom.replace("px", "");
 
-  rankingList.innerHTML = "";
-  ranking.slice(0, 5).forEach(r => {
-    const li = document.createElement("li");
-    li.textContent = `${r.name}: ${r.score}`;
-    rankingList.appendChild(li);
-  });
+    if (pipePosition <= 120 && pipePosition > 0 && marioPosition < 80) {
+      gameOver();
+    }
 
-  gameScreen.classList.add("hidden");
-  gameOverScreen.classList.remove("hidden");
+    score++;
+    scoreText.textContent = "Pontuação: " + score;
+  }, 50);
 }
 
-// Reiniciar
-restartBtn.onclick = () => {
-  gameOverScreen.classList.add("hidden");
-  startScreen.classList.remove("hidden");
-};
-// Importa os métodos do Firebase
-import { getDatabase, ref, remove } from "firebase/database";
+function gameOver() {
+  clearInterval(gameInterval);
 
-// Conecta no Realtime Database
-const db = getDatabase();
+  // Salva no ranking
+  salvarNoRanking(playerName, score);
 
-// Função para limpar TODO o banco
-function limparBanco() {
-  remove(ref(db, '/'))
-    .then(() => {
-      console.log("✅ Banco de dados limpo com sucesso!");
-      alert("Banco de dados foi apagado!");
-    })
-    .catch((error) => {
-      console.error("❌ Erro ao limpar banco: ", error);
-    });
+  // Vai para tela de ranking
+  gameScreen.classList.add("hidden");
+  rankingScreen.classList.remove("hidden");
+
+  carregarRanking();
+}
+
+// -------------------- Firebase Ranking --------------------
+function salvarNoRanking(nome, pontos) {
+  const rankingRef = ref(db, 'ranking');
+  const novoRegistro = push(rankingRef);
+
+  set(novoRegistro, {
+    nome: nome,
+    pontos: pontos
+  }).then(() => {
+    console.log("✅ Pontuação salva!");
+  }).catch((err) => {
+    console.error("❌ Erro:", err);
+  });
+}
+
+function carregarRanking() {
+  const rankingRef = ref(db, 'ranking');
+
+  onValue(rankingRef, (snapshot) => {
+    const dados = snapshot.val();
+    rankingList.innerHTML = "";
+
+    if (dados) {
+      const rankingArray = Object.values(dados).sort((a, b) => b.pontos - a.pontos);
+
+      rankingArray.forEach((item, index) => {
+        const li = document.createElement("li");
+        li.textContent = `${index + 1}. ${item.nome} - ${item.pontos} pontos`;
+        rankingList.appendChild(li);
+      });
+    }
+  });
 }

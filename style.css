@@ -4,83 +4,52 @@
   box-sizing: border-box;
 }
 
-body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  background: linear-gradient(to top, #87ceeb, #ffffff);
-  height: 100vh;
-  overflow: hidden;
-}
-
 .hidden {
   display: none;
 }
 
-/* Tela inicial */
-#startScreen {
-  position: absolute;
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background: #87ceeb;
 }
 
-#startScreen input {
-  padding: 10px;
-  font-size: 16px;
-}
-
-#startScreen button {
-  padding: 10px 20px;
-  font-size: 16px;
-  margin-top: 10px;
-}
-
-#nameError {
-  color: red;
-  margin-top: 10px;
-}
-
-/* Jogo */
-#gameArea {
+.game-board {
+  width: 100%;
+  height: 500px;
+  border-bottom: 15px solid green;
   position: relative;
-  width: 100vw;
-  height: 80vh;
-  margin: auto;
   overflow: hidden;
-  background: transparent;
+  background: linear-gradient(to top, #87ceeb, #fff);
 }
 
-#ground {
+.mario {
+  width: 120px;
   position: absolute;
   bottom: 0;
-  width: 100%;
-  height: 40px;
-  background: green;
-}
-
-#mario {
-  position: absolute;
-  bottom: 40px;
   left: 50px;
+}
+
+.pipe {
+  position: absolute;
+  bottom: 0;
+  right: -80px;
   width: 80px;
+  animation: pipe-animation 2s infinite linear;
 }
 
-#obstacle {
-  position: absolute;
-  bottom: 40px;
-  right: -60px;
-  width: 60px;
+@keyframes pipe-animation {
+  from { right: -80px; }
+  to { right: 100%; }
 }
 
-#score {
-  font-size: 24px;
-  margin-top: 10px;
+.jump {
+  animation: jump 0.6s ease-out;
 }
 
-/* Tela Game Over */
-#gameOverScreen {
-  position: absolute;
-  top: 30%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+@keyframes jump {
+  0% { bottom: 0; }
+  40% { bottom: 180px; }
+  60% { bottom: 180px; }
+  100% { bottom: 0; }
 }
