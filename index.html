@@ -10,7 +10,15 @@
     <title>Mario Game</title>
 </head>
 <body>
-    <div class="game-board day" id="gameBoard">
+    <!-- Tela Inicial -->
+    <div class="start-screen" id="startScreen">
+        <h1>Mario Game</h1>
+        <input type="text" id="nameInput" placeholder="Digite seu nome">
+        <button id="startBtn">Iniciar Jogo</button>
+    </div>
+
+    <!-- Jogo -->
+    <div class="game-board day" id="gameBoard" style="display:none;">
         <img src="./img/mario.gif" class="mario">
         <img src="./img/pipe.png" class="pipe">
         <img src="./img/clouds.png" class="clouds">
@@ -22,17 +30,11 @@
             <h2>Nome: <span id="playerName">---</span></h2>
             <h2>Pontos: <span id="pontos">0</span></h2>
         </div>
-    </div>
 
-    <div class="ranking-board" id="rankingBoard">
-        <h2>Ranking</h2>
-        <ul id="rankingList"></ul>
-    </div>
-
-    <div class="start-menu" id="startMenu">
-        <h1>Mario Game</h1>
-        <input type="text" id="nameInput" placeholder="Digite seu nome">
-        <button id="startBtn">Iniciar Jogo</button>
+        <div class="ranking-board" id="rankingBoard">
+            <h2>Ranking</h2>
+            <ul id="rankingList"></ul>
+        </div>
     </div>
 </body>
 </html>

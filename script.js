@@ -17,7 +17,7 @@ const mario = document.querySelector('.mario');
 const pipe = document.querySelector('.pipe');
 const clouds = document.querySelector('.clouds');
 const gameBoard = document.getElementById('gameBoard');
-const startMenu = document.getElementById('startMenu');
+const startScreen = document.getElementById('startScreen');
 const startBtn = document.getElementById('startBtn');
 const nameInput = document.getElementById('nameInput');
 const playerNameDisplay = document.getElementById('playerName');
@@ -36,15 +36,12 @@ startBtn.addEventListener('click', () => {
     const name = nameInput.value.trim();
     if (!name) { alert('Digite um nome!'); return; }
 
-    // Verifica se o nome já existe
     database.ref('ranking/' + name).get().then(snapshot => {
-        if (snapshot.exists()) {
-            alert('Nome já existe! Ele será atualizado.');
-        }
-        // Salva ou atualiza nome
+        if (snapshot.exists()) { alert('Nome já existe! Ele será atualizado.'); }
         database.ref('ranking/' + name).set({ pontos: 0 });
         playerNameDisplay.textContent = name;
-        startMenu.style.display = 'none';
+        startScreen.style.display = 'none';
+        gameBoard.style.display = 'block';
         startGame();
         loadRanking();
     });
@@ -62,7 +59,6 @@ const jump = () => {
         isJumping = false;
     }, 500);
 };
-
 document.addEventListener('keydown', jump);
 
 // Loop do jogo
@@ -71,16 +67,11 @@ function startGame() {
         const pipePosition = pipe.offsetLeft;
         const marioPosition = +window.getComputedStyle(mario).bottom.replace('px','');
 
-        // Colisão
-        if (pipePosition <= 120 && pipePosition > 0 && marioPosition < 80) {
-            gameOver();
-        }
+        if (pipePosition <= 120 && pipePosition > 0 && marioPosition < 80) gameOver();
 
-        // Pontos
         pontos++;
         pontosDisplay.textContent = pontos;
 
-        // Atualiza no Firebase
         const name = playerNameDisplay.textContent;
         database.ref('ranking/' + name).set({ pontos: pontos });
     }, 100);

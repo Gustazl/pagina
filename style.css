@@ -6,9 +6,46 @@
 
 body {
     font-family: Arial, sans-serif;
-    background: #87ceeb;
 }
 
+/* Tela Inicial */
+.start-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #1E90FF; /* azul */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.start-screen h1 {
+    color: white;
+    margin-bottom: 20px;
+    font-size: 48px;
+}
+
+.start-screen input {
+    padding: 10px;
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.start-screen button {
+    padding: 10px 30px;
+    font-size: 18px;
+    cursor: pointer;
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+/* Jogo */
 .game-board {
     width: 100%;
     height: 500px;
@@ -20,53 +57,18 @@ body {
     transition: background 2s;
 }
 
-.game-board.day {
-    background: linear-gradient(#156c8f, #adccd8);
-}
+.game-board.day { background: linear-gradient(#156c8f, #adccd8); }
+.game-board.night { background: linear-gradient(#0b1d3a, #2b3a57); }
 
-.game-board.night {
-    background: linear-gradient(#0b1d3a, #2b3a57);
-}
+.mario { width: 150px; position: absolute; bottom: 0; }
+.pipe { position: absolute; bottom: 0; width: 80px; animation: pipe-animation 1.5s infinite linear; }
+.clouds { position: absolute; width: 550px; animation: clouds-animation 20s linear infinite; top: 50px; }
 
-.mario {
-    width: 150px;
-    position: absolute;
-    bottom: 0;
-}
+.jump { animation: jump 500ms ease-out; }
 
-.pipe {
-    position: absolute;
-    bottom: 0;
-    width: 80px;
-    animation: pipe-animation 1.5s infinite linear;
-}
-
-.clouds {
-    position: absolute;
-    width: 550px;
-    animation: clouds-animation 20s linear infinite;
-    top: 50px;
-}
-
-.jump {
-    animation: jump 500ms ease-out;
-}
-
-@keyframes pipe-animation {
-    from { right: -80%; }
-    to { right: 100%; }
-}
-
-@keyframes jump {
-    0% { bottom: 0; }
-    40%,50%,60% { bottom: 180px; }
-    100% { bottom: 0; }
-}
-
-@keyframes clouds-animation {
-    0% { left: 100%; }
-    100% { left: -550px; }
-}
+@keyframes pipe-animation { from { right: -80%; } to { right: 100%; } }
+@keyframes jump { 0%{bottom:0;}40%,50%,60%{bottom:180px;}100%{bottom:0;} }
+@keyframes clouds-animation {0%{left:100%;}100%{left:-550px;}}
 
 .score-board {
     position: absolute;
@@ -79,9 +81,7 @@ body {
     z-index: 1000;
 }
 
-.score-board h2 {
-    margin: 5px 0;
-}
+.score-board h2 { margin: 5px 0; }
 
 .rain {
     position: absolute;
@@ -93,35 +93,7 @@ body {
     z-index: 500;
 }
 
-@keyframes rain-fall {
-    to { transform: translateY(600px); }
-}
-
-.start-menu {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.7);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-}
-
-.start-menu input {
-    padding: 10px;
-    font-size: 16px;
-    margin-bottom: 10px;
-}
-
-.start-menu button {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-}
+@keyframes rain-fall { to { transform: translateY(600px); } }
 
 .ranking-board {
     position: absolute;
@@ -133,6 +105,4 @@ body {
     z-index: 1000;
 }
 
-.ranking-board ul {
-    list-style: none;
-}
+.ranking-board ul { list-style: none; }
