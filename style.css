@@ -1,99 +1,87 @@
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 body {
-  font-family: Arial, sans-serif;
   background: #87ceeb;
-  min-height: 100vh;
-  overflow: hidden;
+  font-family: Arial, sans-serif;
+  text-align: center;
 }
 
-/* Telas */
-.screen {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 12px; text-align: center;
-  background: linear-gradient(#87ceeb, #ffffff);
+#start-screen {
+  margin-top: 50px;
 }
-.hidden { display: none; }
 
-h1 { font-size: 42px; color: #d33; }
-h3 { color:#333; }
-.error { color: #d00; min-height: 1.4em; }
-#playerName {
-  padding: 10px 12px; font-size: 18px; width: 280px;
-  border-radius: 10px; border:1px solid #ccc;
+#player-name {
+  padding: 10px;
+  margin: 10px;
 }
-#startBtn, #retryBtn, #clearBtn {
-  padding: 10px 18px; font-size: 16px; border-radius: 10px;
-  border: none; cursor: pointer; background: #0b74de; color:#fff;
-}
-#clearBtn { background: #c23; }
-.actions { display: flex; gap: 10px; margin-top: 10px; }
-.hint { color:#444; opacity:.8; font-size: 14px; }
 
-/* Área do jogo (estilo do seu amigo) */
+#start-btn, #restart-btn {
+  padding: 10px 20px;
+  margin-top: 10px;
+  background: #ffcc00;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.warning {
+  color: red;
+  margin-top: 10px;
+}
+
 .game-board {
   width: 100%;
   height: 500px;
-  border-bottom: 15px solid rgb(1, 255, 69);
+  border-bottom: 15px solid rgb(35, 160, 35);
   margin: 0 auto;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(#156c8f, #adccd8);
-  transition: background 2s;
-}
-.game-board.day   { background: linear-gradient(#156c8f, #adccd8); } /* dia */
-.game-board.night { background: linear-gradient(#0b1d3a, #2b3a57); } /* noite */
-
-.mario {
-  width: 150px; position: absolute; bottom: 0; left: 50px;
-}
-.pipe  {
-  position: absolute; bottom: 0; width: 80px; right: -80px;
-  animation: pipe-animation 1.5s infinite linear;
+  background: linear-gradient(#87ceeb, #e0f6ff);
 }
 
-/* Nuvens como no exemplo do seu amigo */
 .clouds {
-  position: absolute; width: 550px; top: 50px;
-  animation: clouds-animation 20s linear infinite;
-  opacity: .95;
-}
-.clouds-b { top: 120px; animation-duration: 28s; transform: scale(1.1); }
-
-/* Animações */
-@keyframes pipe-animation {
-  from { right: -80%; }
-  to   { right: 100%; }
-}
-
-.jump { animation: jump 500ms ease-out; }
-@keyframes jump {
-  0% { bottom: 0; }
-  40%,50%,60% { bottom: 180px; }
-  100% { bottom: 0; }
+  position: absolute;
+  top: 50px;
+  width: 300px;
+  animation: clouds-animation 20s infinite linear;
 }
 
 @keyframes clouds-animation {
-  0%   { left: 100%; }
-  100% { left: -550px; }
+  from { right: -300px; }
+  to { right: 100%; }
 }
 
-/* Placar */
-.score-board {
-  position: absolute; top: 10px; left: 10px;
-  background: rgba(255,255,255,0.7);
-  padding: 10px 20px; border-radius: 10px;
-  font-family: Arial, sans-serif; z-index: 1000;
+.mario {
+  position: absolute;
+  bottom: 0;
+  width: 150px;
 }
-.score-board h2 { margin: 5px 0; }
 
-/* Gotas de chuva */
-.rain {
-  position: absolute; width: 2px; height: 15px;
-  background: rgba(255,255,255,0.7);
-  top: -20px; animation: rain-fall linear infinite;
-  z-index: 500;
+.pipe {
+  position: absolute;
+  bottom: 0;
+  width: 80px;
+  right: -80px;
+  animation: pipe-animation 2s infinite linear;
 }
-@keyframes rain-fall { to { transform: translateY(600px); } }
+
+@keyframes pipe-animation {
+  from { right: -80px; }
+  to { right: 100%; }
+}
+
+#score {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 20px;
+  font-weight: bold;
+  background: white;
+  padding: 5px 10px;
+  border-radius: 8px;
+}
