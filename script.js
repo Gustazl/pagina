@@ -151,3 +151,20 @@ restartBtn.onclick = () => {
   gameOverScreen.classList.add("hidden");
   startScreen.classList.remove("hidden");
 };
+// Importa os métodos do Firebase
+import { getDatabase, ref, remove } from "firebase/database";
+
+// Conecta no Realtime Database
+const db = getDatabase();
+
+// Função para limpar TODO o banco
+function limparBanco() {
+  remove(ref(db, '/'))
+    .then(() => {
+      console.log("✅ Banco de dados limpo com sucesso!");
+      alert("Banco de dados foi apagado!");
+    })
+    .catch((error) => {
+      console.error("❌ Erro ao limpar banco: ", error);
+    });
+}
